@@ -17,19 +17,22 @@ export class DivElement extends DivMatrix2D {
 
     public render: () => void = null;
 
-    constructor(w: number, h: number) {
-        super("div", {
-            position: "absolute"
+    constructor(tag: string = "div", style?: any) {
+        super(tag, {
+            position: "absolute",
+            ...style
         });
 
-        this.width = w;
-        this.height = h;
+
         //this.html = document.createElement("div");
 
         //this.html.style.position = "absolute";
     }
 
-    public test() {
+    public test(w: number, h: number) {
+
+        this.width = w;
+        this.height = h;
         this.html.style.backgroundColor = "rgba(255,0,0,0.5)";
         this.html.style.width = this.width + "px";
         this.html.style.height = this.height + "px";

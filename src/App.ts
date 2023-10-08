@@ -19,8 +19,8 @@ export class App {
         this.group2.appendChild(this.group);
 
         for (let i = 0; i < 5; i++) {
-            let redSquare = new DivElement(200, 200);
-            redSquare.test();
+            let redSquare = new DivElement();
+            redSquare.test(200, 200);
             if (i == 0) this.redSquare = redSquare
             //redSquare.rotation = i * 20;
             //redSquare.xAxis = 50 + 100 * i;

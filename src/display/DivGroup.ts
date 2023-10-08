@@ -7,7 +7,7 @@ export class DivGroup extends DivElement {
     protected _children: any[];
 
     constructor() {
-        super(1, 1);
+        super();
         this._children = [];
     }
 
