@@ -93,8 +93,8 @@ export class DivGroup extends DivElement {
 
             if (this._rotation != 0) {
 
-                dx = -this.xAxis + o.x * this._scaleX;
-                dy = -this.yAxis + o.y * this._scaleY;
+                dx = -this.xAxis + (o.x) * this._scaleX;
+                dy = -this.yAxis + (o.y) * this._scaleY;
                 a = Math.atan2(dy, dx);
                 d = Math.sqrt(dx * dx + dy * dy);
 
@@ -107,8 +107,8 @@ export class DivGroup extends DivElement {
 
 
             } else {
-                o._x = this._x - this.xAxis + o.x * this._scaleX;
-                o._y = this._y - this.yAxis + o.y * this._scaleY;
+                o._x = this._x - this.xAxis + (o.x) * this._scaleX;
+                o._y = this._y - this.yAxis + (o.y) * this._scaleY;
                 o._rotation = o._rotation;
             }
 

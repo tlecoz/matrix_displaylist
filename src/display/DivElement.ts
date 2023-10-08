@@ -98,9 +98,9 @@ export class DivElement extends DivMatrix2D {
 
     public applyTransform(): DOMMatrix {
         const m: DOMMatrix = this.matrix;
-        m.translateSelf(this._x - this.width * 0.5 * this._scaleX, this._y - this.height * 0.5 * this._scaleY)
+        m.translateSelf(this._x - this.xAxis - this.width * 0.5 * this._scaleX, this._y - this.yAxis - this.height * 0.5 * this._scaleY)
         m.rotateSelf(this._rotation);
-        m.translateSelf(this.width * this._scaleX * 0.5 + this.xAxis, this.height * this._scaleY * 0.5 + this.yAxis)
+        m.translateSelf(this.width * this._scaleX * 0.5, this.height * this._scaleY * 0.5)
         m.scaleSelf(this.scaleX * this._scaleX, this.scaleY * this._scaleY);
         return m;
     }

@@ -1,10 +1,45 @@
 import { DivElement } from "./display/DivElement";
 import { DivGroup } from "./display/DivGroup";
 import { StageDiv } from "./display/StageDiv";
+import { FreeTransform } from "./freeTransform/FreeTransform";
 
 export class App {
 
 
+    private stage: StageDiv;
+    private freeTransform: FreeTransform;
+
+
+
+    constructor(w, h) {
+        this.stage = new StageDiv(w, h, true)
+
+        this.freeTransform = new FreeTransform();
+
+        this.freeTransform.init({
+            x: 400,
+            y: 400,
+            width: 200,
+            height: 300,
+            scaleX: 1,
+            scaleY: 1,
+            rotation: 0
+        })
+
+
+        this.stage.appendChild(this.freeTransform);
+
+
+    }
+    public update() {
+
+
+        this.stage.drawElements()
+    }
+
+    /*
+
+    
     private stage: StageDiv;
     private redSquare: DivElement;
     private group: DivGroup;
@@ -43,21 +78,22 @@ export class App {
 
 
 
+    
     public update() {
 
         this.group2.x = 100;
-        this.group2.scaleX = 1.5;
+        //this.group2.scaleX = 1.5;
         this.group2.yAxis = 0;
-        this.group2.rotation--;
+        //this.group2.rotation--;
 
 
         this.group.x = 300;
-        this.group.scaleY = 0.5;
+        //this.group.scaleY = 0.5;
         //this.group.xAxis = -100;
         //this.group.yAxis = -100;
 
         //this.group.scaleY = 1;
-        this.group.rotation++
+        //this.group.rotation++
 
         this.group.children[2].rotation++;
         //this.redSquare.scaleX += 0.01;
@@ -72,7 +108,7 @@ export class App {
         //console.log(this.redSquare.globalX, this.redSquare.globalY)
         this.stage.drawElements()
     }
-
+    */
 
 
 

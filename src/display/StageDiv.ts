@@ -7,9 +7,12 @@ export class StageDiv extends DivGroup {
         super();
         this._stage = this;
         this.html = document.createElement("div");
+        this.html.style.backgroundColor = "#000000"
         this.html.style.position = "absolute";
         this.html.style.width = w + "px";
         this.html.style.height = h + "px";
+        this.html.style.top = "50px";
+        this.html.style.left = "100px";
         if (appendOnBody) document.body.appendChild(this.html);
 
 
