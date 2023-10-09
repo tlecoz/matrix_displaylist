@@ -32,6 +32,8 @@ export class FreeTransform extends DivGroup {
     protected offsetScaleY: number = 1;
     protected distFromOpposite: number = 0;
     protected angleFromOpposite: number = 0;
+    protected offsetOriginDist: number = 0;
+    protected offsetOriginAngle: number = 0;
     protected orientationX: number = 0;
     protected orientationY: number = 0;
 
@@ -127,6 +129,7 @@ export class FreeTransform extends DivGroup {
             const parent = this.parent.html.getBoundingClientRect();
             const btn = this.btn.html.getBoundingClientRect();
             const opposite = this.opposite.html.getBoundingClientRect();
+            const axis = this.rotationAxis.html.getBoundingClientRect();
 
             const a = { x: btn.x + btn.width * 0.5 - parent.x - this.x, y: btn.y + btn.height * 0.5 - parent.y - this.y }
             const b = { x: opposite.x + opposite.width * 0.5 - parent.x - this.x, y: opposite.y + opposite.height * 0.5 - parent.y - this.y }
@@ -140,6 +143,16 @@ export class FreeTransform extends DivGroup {
 
             this.orientationX = dx > 0 ? 1 : -1;
             this.orientationY = dy > 0 ? 1 : -1;
+
+            this.offsetScaleX = this.scaleX;
+            this.offsetScaleY = this.scaleY;
+            this.offsetX = this.x;
+            this.offsetY = this.y;
+
+            dx = opposite.x - axis.x;
+            dy = opposite.y - axis.y;
+            this.offsetOriginDist = Math.sqrt(dx * dx + dy * dy);
+            this.offsetOriginAngle = Math.atan2(dy, dx);
 
         }
 
@@ -234,6 +247,16 @@ export class FreeTransform extends DivGroup {
     }
 
     private setSize(mouseEvent: any): void {
+        const d = this.getDistFromOppositePoint(mouseEvent);
+        const scale = d / this.distFromOpposite;
+        const parent = this.parent.html.getBoundingClientRect();
+        console.log(scale)
+
+        this.scaleX = scale * this.offsetScaleX;
+        this.scaleY = scale * this.offsetScaleY;
+
+        this.x = this.offsetX + this.opposite.x + Math.cos(this.offsetOriginAngle + Math.PI) * this.offsetOriginDist * scale;
+        this.y = this.offsetY + this.opposite.y + Math.sin(this.offsetOriginAngle + Math.PI) * this.offsetOriginDist * scale;
 
     }
 
@@ -282,6 +305,7 @@ export class FreeTransform extends DivGroup {
         this.scaleY = this.offsetScaleY + (d - this.distFromOpposite) / (this.distFromOpposite / this.offsetScaleY);
     }
     private setPosition(mouseEvent: any): void {
+
 
     }
 

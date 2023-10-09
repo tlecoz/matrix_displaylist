@@ -12,7 +12,7 @@ export class StageDiv extends DivGroup {
         this.html.style.width = w + "px";
         this.html.style.height = h + "px";
         this.html.style.top = "50px";
-        this.html.style.left = "100px";
+        this.html.style.left = "200px";
         if (appendOnBody) document.body.appendChild(this.html);
 
 
