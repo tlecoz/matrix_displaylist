@@ -25,6 +25,8 @@ export class FreeTransform extends DivGroup {
 
     protected offsetX: number = 0;
     protected offsetY: number = 0;
+    protected offsetX2: number = 0;
+    protected offsetY2: number = 0;
     protected offsetAngle: number = 0;
     protected offsetScaleX: number = 1;
     protected offsetScaleY: number = 1;
@@ -169,8 +171,10 @@ export class FreeTransform extends DivGroup {
             if (movingAxis) {
                 this.xAxis = this.rotationAxis.x;
                 this.yAxis = this.rotationAxis.y;
-                this.x = this.offsetX + this.rotationAxis.x;
-                this.y = this.offsetY + this.rotationAxis.y;
+
+
+                this.x = this.offsetX + this.rotationAxis.x - this.offsetX2;
+                this.y = this.offsetY + this.rotationAxis.y - this.offsetY2;
             } else if (resizing) {
                 this.offsetScaleX = this.scaleX;
                 this.offsetScaleY = this.scaleY;
@@ -186,8 +190,13 @@ export class FreeTransform extends DivGroup {
 
         this.rotationAxis = createAnchor(14, (current, e) => {
             movingAxis = true;
+
             this.offsetX = this.x;
             this.offsetY = this.y;
+
+
+            this.offsetX2 = this.rotationAxis.x;
+            this.offsetY2 = this.rotationAxis.y;
         })
 
         this.border.addEventListener("mousedown", (e) => { moving = true; })
@@ -270,13 +279,31 @@ export class FreeTransform extends DivGroup {
     private setPosition(mouseEvent: any): void {
 
     }
+
+    public rotationAxisObj: any;
+
     private moveRotationAxis(mouseEvent: any): void {
         const parent = this.parent.html.getBoundingClientRect();
-        let mx = mouseEvent.clientX - parent.x - this.x;
-        let my = mouseEvent.clientY - parent.y - this.y;
+        //const axis = this.rotationAxis.html.getBoundingClientRect();
+        let r = this.rotation * Math.PI / 180;
+        let mx = (mouseEvent.clientX - parent.x - this.x) / this.scaleX;//- axis.x - axis.width * 0.5;
+        let my = (mouseEvent.clientY - parent.y - this.y) / this.scaleY;//- axis.y - axis.height * 0.5;
+        let a = Math.atan2(my, mx);
+        let d = Math.sqrt(mx * mx + my * my);
 
-        this.rotationAxis.x = mx;
-        this.rotationAxis.y = my;
+        this.rotationAxisObj = {
+            mx,
+            my,
+            d,
+            a
+        }
+
+
+
+
+
+        this.rotationAxis.x = this.offsetX2 + Math.cos(-r + a) * d;
+        this.rotationAxis.y = this.offsetY2 + Math.sin(-r + a) * d;
 
 
     }
