@@ -250,13 +250,14 @@ export class FreeTransform extends DivGroup {
         const d = this.getDistFromOppositePoint(mouseEvent);
         const scale = d / this.distFromOpposite;
         const parent = this.parent.html.getBoundingClientRect();
+        const opposite = this.parent.html.getBoundingClientRect();
         console.log(scale)
 
         this.scaleX = scale * this.offsetScaleX;
         this.scaleY = scale * this.offsetScaleY;
 
-        this.x = this.offsetX + this.opposite.x + Math.cos(this.offsetOriginAngle + Math.PI) * this.offsetOriginDist * scale;
-        this.y = this.offsetY + this.opposite.y + Math.sin(this.offsetOriginAngle + Math.PI) * this.offsetOriginDist * scale;
+        this.x = this.offsetX + Math.cos(this.offsetOriginAngle + Math.PI) * (this.offsetOriginDist * scale - this.distFromOpposite * 0.5);
+        this.y = this.offsetY + Math.sin(this.offsetOriginAngle + Math.PI) * (this.offsetOriginDist * scale - this.distFromOpposite * 0.5);
 
     }
 
