@@ -5,6 +5,7 @@ import { Pt2D } from "../geom/Pt2D";
 
 export class FreeTransform extends DivGroup {
 
+    public buttons: DivGroup;
     public left: DivElement;
     public topLeft: DivElement;
     public bottomLeft: DivElement;
@@ -20,10 +21,15 @@ export class FreeTransform extends DivGroup {
     public rotationBtn: DivElement;
 
     protected btn: DivElement;
+    protected opposite: DivElement;
 
     protected offsetX: number = 0;
     protected offsetY: number = 0;
     protected offsetAngle: number = 0;
+    protected distFromOpposite: number = 0;
+    protected angleFromOpposite: number = 0;
+    protected orientationX: number = 0;
+    protected orientationY: number = 0;
 
     constructor() {
         super();
@@ -46,10 +52,11 @@ export class FreeTransform extends DivGroup {
                 height: size + "px",
                 ...anchorStyle
             });
+            anchor.noScale = true;
             anchor.xAxis = size / 2;
             anchor.yAxis = size / 2;
             anchor.addEventListener("mousedown", (e) => func(anchor, e))
-            this.appendChild(anchor);
+            this.buttons.appendChild(anchor);
             return anchor;
         }
 
@@ -57,8 +64,10 @@ export class FreeTransform extends DivGroup {
         this.border = this.appendChild(new DivElement("div", {
             border: "solid 1px #ffffff",
             backgroundColor: "rgba(255,200,200,0.5)",
-
         }))
+
+        this.buttons = this.appendChild(new DivGroup()) as DivGroup;
+
         this.border.appendChild(new UIElement("div", {
             color: "#ffffff",
             fontSize: "26px",
@@ -102,10 +111,23 @@ export class FreeTransform extends DivGroup {
 
         const onResize = (current, e) => {
             resizing = true;
-            resizingX = (current === this.left || current === this.right);
-            resizingX = (current === this.top || current === this.bottom);
+            resizingX = current == this.left || current == this.right;
+            resizingY = (current == this.top || current == this.bottom);
+
             this.btn = current;
+            if (current.opposite) this.opposite = current.opposite as DivElement;
+
+            let dx = this.btn.x - this.opposite.x;
+            let dy = this.btn.y - this.opposite.y;
+            this.distFromOpposite = Math.sqrt(dx * dx + dy * dy);
+            this.angleFromOpposite = Math.atan2(dy, dx);
+
+            this.orientationX = dx > 0 ? 1 : -1;
+            this.orientationY = dy > 0 ? 1 : -1;
+
         }
+
+
 
         const anchorSize = 12;
         this.left = createAnchor(anchorSize, onResize);
@@ -116,6 +138,18 @@ export class FreeTransform extends DivGroup {
         this.bottomRight = createAnchor(anchorSize, onResize);
         this.top = createAnchor(anchorSize, onResize);
         this.bottom = createAnchor(anchorSize, onResize);
+
+
+        const setOpposite = (a: any, b: any) => {
+            a.opposite = b;
+            b.opposite = a;
+        }
+
+        setOpposite(this.left, this.right);
+        setOpposite(this.topLeft, this.bottomRight);
+        setOpposite(this.bottomLeft, this.topRight);
+        setOpposite(this.top, this.bottom);
+
 
         document.body.addEventListener("mouseup", (e) => {
             if (movingAxis) {
@@ -163,10 +197,60 @@ export class FreeTransform extends DivGroup {
 
 
     }
+
+    private getClosestPointOnLine(mouseX: number, mouseY: number, p0: { x: number, y: number }, p1: { x: number, y: number }) {
+        const dx = p1.x - p0.x;
+        const dy = p1.y - p0.y;
+        const t = ((mouseX - p0.x) * dx + (mouseY - p0.y) * dy) / (dx * dx + dy * dy);
+        const closestX = p0.x + t * dx;
+        const closestY = p0.y + t * dy;
+        return { x: closestX, y: closestY };
+    }
+
     private setSize(mouseEvent: any): void {
 
     }
     private setSizeX(mouseEvent: any): void {
+        const parent = this.parent.html.getBoundingClientRect();
+        const btn = this.btn.html.getBoundingClientRect();
+        const opposite = this.opposite.html.getBoundingClientRect();
+
+        let mx = mouseEvent.clientX - parent.x - this.x;
+        let my = mouseEvent.clientY - parent.y - this.y;
+
+        console.log(btn.x)
+
+        const a = { x: btn.x + btn.width * 0.5 - parent.x - this.x, y: btn.y + btn.height * 0.5 - parent.y - this.y }
+        const b = { x: opposite.x + opposite.width * 0.5 - parent.x - this.x, y: opposite.y + opposite.height * 0.5 - parent.y - this.y }
+        let pt = this.getClosestPointOnLine(
+            mx, my,
+            a,
+            b
+        );
+
+
+        console.log(mx, a.x, b.x, pt.x)
+        console.log(my, a.y, b.y, pt.y)
+
+        let dx = pt.x - b.x;
+        let dy = pt.y - b.y;
+        let d = Math.sqrt(dx * dx + dy * dy);
+
+        console.log(d, this.distFromOpposite);
+
+
+        let sensX = dx > 0 ? 1 : -1;
+        let sensY = dy > 0 ? 1 : -1;
+
+        if (sensX != this.orientationX || sensY != this.orientationY) {
+            d *= -1;
+        }
+
+        //console.log(d, this.distFromOpposite)
+        this.scaleX = (d / this.distFromOpposite);
+        this.applyTransform();
+        //this.border.scaleX = this.scaleX;
+
 
     }
     private setSizeY(mouseEvent: any): void {
@@ -183,7 +267,6 @@ export class FreeTransform extends DivGroup {
         this.rotationAxis.x = mx;
         this.rotationAxis.y = my;
 
-        console.log("moveRotationAxis ", mx, my)
 
     }
 
@@ -224,7 +307,6 @@ export class FreeTransform extends DivGroup {
         h *= this.scaleY;
         h *= 0.5;
 
-        console.log("h = ", h)
 
         this.top.x = 0;
         this.top.y = -h;
@@ -267,7 +349,7 @@ export class FreeTransform extends DivGroup {
         this.scaleY = o.scaleY;
 
         setTimeout(() => {
-            console.log(this.rotationBtn.html.getBoundingClientRect())
+            //console.log(this.rotationBtn.html.getBoundingClientRect())
         }, 100);
 
 

@@ -61,29 +61,30 @@ export class DivGroup extends DivElement {
 
 
 
-                this._rotation = this.rotation;
+                this._rotation = this.rotation + parent.rotation;
                 this._x = parent._x + Math.cos(r + a) * d;
                 this._y = parent._y + Math.sin(r + a) * d;
 
             } else {
-
+                this._rotation = this.rotation;
                 this._x = -parent.xAxis + parent._x + this.x * parent._scaleX;
                 this._y = -parent.yAxis + parent._y + this.y * parent._scaleY;
-
+                this._scaleX = parent._scaleX * this.scaleX;
+                this._scaleY = parent._scaleY * this.scaleY;
                 //console.log(this._x + " = " + parent._x + " + " + this.x + " * " + parent._scaleX);
             }
 
 
 
-            this._rotation = this.rotation;
-            this._scaleX = parent._scaleX * this.scaleX;
-            this._scaleY = parent._scaleY * this.scaleY;
+
+
+
         } else {
             this._x = this.x;
             this._y = this.y;
             this._rotation = this.rotation;
-            this._scaleX = this.scaleX;
-            this._scaleY = this.scaleY;
+            this._scaleX = 1//this.scaleX;
+            this._scaleY = 1//this.scaleY;
         }
 
 
@@ -112,8 +113,14 @@ export class DivGroup extends DivElement {
                 o._rotation = o._rotation;
             }
 
-            o._scaleX = this._scaleX;
-            o._scaleY = this._scaleY;
+            if (o instanceof DivGroup) {
+
+            } else {
+
+                o._scaleX = this.scaleX * o.scaleX;
+                o._scaleY = this.scaleY * o.scaleY;
+            }
+
 
 
 
