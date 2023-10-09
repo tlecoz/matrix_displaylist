@@ -74,11 +74,14 @@ export class FreeTransform extends DivGroup {
 
         this.buttons = this.appendChild(new DivGroup()) as DivGroup;
 
-        this.border.appendChild(new UIElement("div", {
+        const label = new DivElement("div", {
             color: "#ffffff",
             fontSize: "26px",
             padding: "10px"
-        })).text = "Youpi !"
+        });
+        label.text = "youpi !";
+
+        this.border.appendChild(label)
 
 
         let resizing: boolean = false;
@@ -198,7 +201,7 @@ export class FreeTransform extends DivGroup {
 
         this.rotationBtn = createAnchor(16, (current, e) => {
             rotating = true;
-            this.offsetAngle = this.rotation * Math.PI / 180;  //- Math.PI / 2;
+            this.offsetAngle = this.getAngleBetweenMouseAndAxis(e) - this.rotation * Math.PI / 180;  //- Math.PI / 2;
         })
 
         this.rotationAxis = createAnchor(14, (current, e) => {
@@ -216,8 +219,12 @@ export class FreeTransform extends DivGroup {
 
     }
 
-    private setRotation(mouseEvent: any): void {
 
+    private setRotation(mouseEvent: any): void {
+        this.rotation = (-this.offsetAngle + this.getAngleBetweenMouseAndAxis(mouseEvent)) / (Math.PI / 180);
+    }
+
+    private getAngleBetweenMouseAndAxis(mouseEvent: any) {
         const parent = this.parent.html.getBoundingClientRect();
         const axis = this.rotationAxis.html.getBoundingClientRect();
 
@@ -230,12 +237,10 @@ export class FreeTransform extends DivGroup {
         let dx = mx - xAxis;
         let dy = my - yAxis;
 
-        let a = Math.PI / 2 + Math.atan2(dy, dx) - this.offsetAngle;
-        this.rotation = (this.offsetAngle + a) / (Math.PI / 180);
-
-
-
+        return Math.PI / 2 + Math.atan2(dy, dx);
     }
+
+
 
     private getClosestPointOnLine(mouseX: number, mouseY: number, p0: { x: number, y: number }, p1: { x: number, y: number }) {
         const dx = p1.x - p0.x;
