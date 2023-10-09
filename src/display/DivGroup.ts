@@ -69,13 +69,13 @@ export class DivGroup extends DivElement {
                 this._rotation = this.rotation;
                 this._x = -parent.xAxis + parent._x + this.x * parent._scaleX;
                 this._y = -parent.yAxis + parent._y + this.y * parent._scaleY;
-                this._scaleX = parent._scaleX * this.scaleX;
-                this._scaleY = parent._scaleY * this.scaleY;
+
                 //console.log(this._x + " = " + parent._x + " + " + this.x + " * " + parent._scaleX);
             }
 
 
-
+            this._scaleX = parent._scaleX * this.scaleX;
+            this._scaleY = parent._scaleY * this.scaleY;
 
 
 

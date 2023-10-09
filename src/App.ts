@@ -23,7 +23,7 @@ export class App {
             height: 300,
             scaleX: 1,
             scaleY: 1,
-            rotation: 0
+            rotation: 10
         })
 
 

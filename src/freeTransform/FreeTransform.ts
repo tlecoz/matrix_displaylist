@@ -26,6 +26,8 @@ export class FreeTransform extends DivGroup {
     protected offsetX: number = 0;
     protected offsetY: number = 0;
     protected offsetAngle: number = 0;
+    protected offsetScaleX: number = 1;
+    protected offsetScaleY: number = 1;
     protected distFromOpposite: number = 0;
     protected angleFromOpposite: number = 0;
     protected orientationX: number = 0;
@@ -114,11 +116,23 @@ export class FreeTransform extends DivGroup {
             resizingX = current == this.left || current == this.right;
             resizingY = (current == this.top || current == this.bottom);
 
+
+
+
             this.btn = current;
             if (current.opposite) this.opposite = current.opposite as DivElement;
 
-            let dx = this.btn.x - this.opposite.x;
-            let dy = this.btn.y - this.opposite.y;
+            const parent = this.parent.html.getBoundingClientRect();
+            const btn = this.btn.html.getBoundingClientRect();
+            const opposite = this.opposite.html.getBoundingClientRect();
+
+            const a = { x: btn.x + btn.width * 0.5 - parent.x - this.x, y: btn.y + btn.height * 0.5 - parent.y - this.y }
+            const b = { x: opposite.x + opposite.width * 0.5 - parent.x - this.x, y: opposite.y + opposite.height * 0.5 - parent.y - this.y }
+
+
+
+            let dx = a.x - b.x;
+            let dy = a.y - b.y;
             this.distFromOpposite = Math.sqrt(dx * dx + dy * dy);
             this.angleFromOpposite = Math.atan2(dy, dx);
 
@@ -157,6 +171,9 @@ export class FreeTransform extends DivGroup {
                 this.yAxis = this.rotationAxis.y;
                 this.x = this.offsetX + this.rotationAxis.x;
                 this.y = this.offsetY + this.rotationAxis.y;
+            } else if (resizing) {
+                this.offsetScaleX = this.scaleX;
+                this.offsetScaleY = this.scaleY;
             }
             this.offsetX = this.offsetY = this.offsetAngle = 0;
             resizing = resizingX = resizingY = rotating = movingAxis = moving = false;
@@ -218,7 +235,6 @@ export class FreeTransform extends DivGroup {
         let mx = mouseEvent.clientX - parent.x - this.x;
         let my = mouseEvent.clientY - parent.y - this.y;
 
-        console.log(btn.x)
 
         const a = { x: btn.x + btn.width * 0.5 - parent.x - this.x, y: btn.y + btn.height * 0.5 - parent.y - this.y }
         const b = { x: opposite.x + opposite.width * 0.5 - parent.x - this.x, y: opposite.y + opposite.height * 0.5 - parent.y - this.y }
@@ -229,15 +245,10 @@ export class FreeTransform extends DivGroup {
         );
 
 
-        console.log(mx, a.x, b.x, pt.x)
-        console.log(my, a.y, b.y, pt.y)
 
         let dx = pt.x - b.x;
         let dy = pt.y - b.y;
         let d = Math.sqrt(dx * dx + dy * dy);
-
-        console.log(d, this.distFromOpposite);
-
 
         let sensX = dx > 0 ? 1 : -1;
         let sensY = dy > 0 ? 1 : -1;
@@ -247,8 +258,8 @@ export class FreeTransform extends DivGroup {
         }
 
         //console.log(d, this.distFromOpposite)
-        this.scaleX = (d / this.distFromOpposite);
-        this.applyTransform();
+        this.scaleX = this.offsetScaleX + (d - this.distFromOpposite) / (this.distFromOpposite / this.offsetScaleX);
+
         //this.border.scaleX = this.scaleX;
 
 
