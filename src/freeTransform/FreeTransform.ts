@@ -169,12 +169,12 @@ export class FreeTransform extends DivGroup {
 
         document.body.addEventListener("mouseup", (e) => {
             if (movingAxis) {
-                this.xAxis = this.rotationAxis.x;
-                this.yAxis = this.rotationAxis.y;
+                this.xAxis = this.rotationAxis.x * this.scaleX;
+                this.yAxis = this.rotationAxis.y * this.scaleY;
 
 
-                this.x = this.offsetX + this.rotationAxis.x - this.offsetX2;
-                this.y = this.offsetY + this.rotationAxis.y - this.offsetY2;
+                this.x = this.offsetX + this.rotationAxis.x * this.scaleX - this.offsetX2;
+                this.y = this.offsetY + this.rotationAxis.y * this.scaleY - this.offsetY2;
             } else if (resizing) {
                 this.offsetScaleX = this.scaleX;
                 this.offsetScaleY = this.scaleY;
@@ -211,8 +211,8 @@ export class FreeTransform extends DivGroup {
         let mx = mouseEvent.clientX - parent.x - this.x + (axis.x + axis.width * 0.5);
         let my = mouseEvent.clientY - parent.y - this.y + (axis.y + axis.height * 0.5);
 
-        let xAxis = axis.x + axis.width// * 0.5;
-        let yAxis = axis.y + axis.height// * 0.5;
+        let xAxis = axis.x + axis.width * 0.5;
+        let yAxis = axis.y + axis.height * 0.5;
 
         let dx = mx - xAxis;
         let dy = my - yAxis;
@@ -236,7 +236,9 @@ export class FreeTransform extends DivGroup {
     private setSize(mouseEvent: any): void {
 
     }
-    private setSizeX(mouseEvent: any): void {
+
+
+    private getDistFromOppositePoint(mouseEvent: any): number {
         const parent = this.parent.html.getBoundingClientRect();
         const btn = this.btn.html.getBoundingClientRect();
         const opposite = this.opposite.html.getBoundingClientRect();
@@ -266,15 +268,18 @@ export class FreeTransform extends DivGroup {
             d *= -1;
         }
 
-        //console.log(d, this.distFromOpposite)
+        return d;
+    }
+
+    private setSizeX(mouseEvent: any): void {
+
+        const d = this.getDistFromOppositePoint(mouseEvent);
         this.scaleX = this.offsetScaleX + (d - this.distFromOpposite) / (this.distFromOpposite / this.offsetScaleX);
-
-        //this.border.scaleX = this.scaleX;
-
 
     }
     private setSizeY(mouseEvent: any): void {
-
+        const d = this.getDistFromOppositePoint(mouseEvent);
+        this.scaleY = this.offsetScaleY + (d - this.distFromOpposite) / (this.distFromOpposite / this.offsetScaleY);
     }
     private setPosition(mouseEvent: any): void {
 
