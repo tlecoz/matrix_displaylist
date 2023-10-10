@@ -103,10 +103,11 @@ export class DivElement extends DivMatrix2D {
         const sx: number = this.noScale ? 1 : this._scaleX;
         const sy: number = this.noScale ? 1 : this._scaleY;
 
+        /*
         if (this.width > 100) {
             console.log(this.scaleX, this._scaleX, this.parent.scaleX, this.parent._scaleX)
         }
-
+        */
 
         m.translateSelf(this._x - this.xAxis - this.width * 0.5, this._y - this.yAxis - this.height * 0.5)
         m.rotateSelf(this._rotation);

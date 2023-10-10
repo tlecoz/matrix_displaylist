@@ -16,6 +16,11 @@ export class App {
 
         this.freeTransform = new FreeTransform();
 
+
+
+
+        this.stage.appendChild(this.freeTransform);
+
         this.freeTransform.init({
             x: 400,
             y: 400,
@@ -26,8 +31,15 @@ export class App {
             rotation: 0
         })
 
-
-        this.stage.appendChild(this.freeTransform);
+        this.freeTransform.init({
+            x: 400,
+            y: 400,
+            width: 200,
+            height: 300,
+            scaleX: 1.5,
+            scaleY: 1,
+            rotation: 0
+        })
 
 
     }
