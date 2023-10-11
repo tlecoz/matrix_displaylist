@@ -111,9 +111,6 @@ export class Matrix2D extends EventDispatcher {
         m.translateSelf(this.x, this.y);
         m.rotateSelf(this.rotation);
         m.translateSelf(-this.xAxis * this.scaleX, -this.yAxis * this.scaleY)
-
-
-        console.log(this.xAxis, this.yAxis);
         m.scaleSelf(this.width * this.scaleX, this.height * this.scaleY);
 
 
@@ -126,7 +123,6 @@ export class Matrix2D extends EventDispatcher {
     public translate(x: number, y: number): DOMMatrix { return this.matrix.translateSelf(x, y); }
     public rotate(angle: number): DOMMatrix { return this.matrix.rotateSelf(angle); }
     public scale(x: number, y: number): DOMMatrix { return this.matrix.scaleSelf(x, y); }
-
     public invert(): DOMMatrix { return this.matrix.invertSelf() }
     public rotateFromVector(x: number, y: number): DOMMatrix { return this.matrix.rotateFromVectorSelf(x, y) }
     public multiply(m: Matrix2D): void { this.matrix.multiplySelf(m.domMatrix); }

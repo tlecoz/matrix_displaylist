@@ -36,13 +36,19 @@ export class FreeTransform extends DivGroup {
     protected offsetOriginAngle: number = 0;
     protected orientationX: number = 0;
     protected orientationY: number = 0;
+    protected offsetAxisX: number = 0;
+    protected offsetAxisY: number = 0;
+    protected offsetDistX: number = 0;
+    protected offsetDistY: number = 0;
 
     constructor() {
         super();
 
+
+
         let anchorStyle = {
             borderRadius: "50%",
-            border: "solid 1px #666666",
+            outline: "solid 1px #666666",
             backgroundColor: "#ffffff",
             cursor: "pointer",
             userSelect: "none",
@@ -68,7 +74,7 @@ export class FreeTransform extends DivGroup {
 
 
         this.border = this.appendChild(new DivElement("div", {
-            border: "solid 1px #ffffff",
+            outline: "solid 1px #ffffff",
             backgroundColor: "rgba(255,200,200,0.5)",
         }))
 
@@ -94,6 +100,8 @@ export class FreeTransform extends DivGroup {
 
         document.body.addEventListener("mousemove", (e) => {
 
+
+
             if (rotating) {
                 this.setRotation(e);
                 return;
@@ -103,6 +111,9 @@ export class FreeTransform extends DivGroup {
                 if (resizingX) this.setSizeX(e);
                 else if (resizingY) this.setSizeY(e);
                 else this.setSize(e);
+
+
+
                 return;
             }
 
@@ -157,6 +168,8 @@ export class FreeTransform extends DivGroup {
             this.offsetOriginDist = Math.sqrt(dx * dx + dy * dy);
             this.offsetOriginAngle = Math.atan2(dy, dx);
 
+
+
         }
 
 
@@ -185,8 +198,51 @@ export class FreeTransform extends DivGroup {
 
 
         document.body.addEventListener("mouseup", (e) => {
+
+
+            const updateAxis = () => {
+                let o = this.rotationAxis.getBoundingRect();
+                let axis = { x: o.x + o.width * 0.5, y: o.y + o.height * 0.5 };
+
+                o = this.center.getBoundingRect();
+                let center = { x: o.x + o.width * 0.5, y: o.y + o.height * 0.5 };
+                console.log(o)
+
+                let parent = this.parent.getBoundingRect();
+
+
+
+                let dx = (axis.x - center.x) / this.scaleX;
+                let dy = (axis.y - center.y) / this.scaleY;
+                let d = Math.sqrt(dx * dx + dy * dy);
+                let a = Math.atan2(dy, dx);
+                this.xAxis = Math.round(Math.cos(a) * d * 100000) / 100000;
+                this.yAxis = Math.round(Math.sin(a) * d * 100000) / 100000;
+
+                this.x = - parent.x + center.x / this.scaleX + this.xAxis;
+                this.y = - parent.y + center.y / this.scaleY + this.yAxis;
+            }
+
             if (movingAxis) {
 
+                updateAxis();
+
+
+                //console.log("x = " + this.x + " vs " + (center.x - parent.x) / this.scaleX, this.xAxis, axis.x - parent.x)
+                //console.log("y = " + this.y + " vs " + (center.y - parent.y) / this.scaleY, this.yAxis, axis.y - parent.y)
+
+                /*if (debugPt) {
+                    debugPt.x = -parent.x * 2 + center.x + Math.cos(a) * d;   // * this.scaleX;
+                    debugPt.y = -parent.y * 2 + center.y + Math.sin(a) * d; //* this.scaleY;
+
+                    debugPt.x -= debugPt.width * 0.5;
+                    debugPt.y -= debugPt.height * 0.5;
+
+                }*/
+
+
+
+                /*
                 let o = this.center.getBoundingRect();
                 const center = { x: o.x + o.width * 0.5, y: o.y + o.height * 0.5 };
 
@@ -218,6 +274,13 @@ export class FreeTransform extends DivGroup {
 
                 this.x = this.offsetX + Math.cos(a) * d;
                 this.y = this.offsetY + Math.sin(a) * d;
+
+                this.offsetX = this.x;
+                this.offsetY = this.y;
+                */
+
+
+
 
 
 
@@ -254,8 +317,10 @@ export class FreeTransform extends DivGroup {
 
                 this.offsetScaleX = this.scaleX;
                 this.offsetScaleY = this.scaleY;
+
+                updateAxis();
             }
-            this.offsetX = this.offsetY = this.offsetAngle = 0;
+
             resizing = resizingX = resizingY = rotating = movingAxis = moving = false;
         })
 
@@ -269,16 +334,38 @@ export class FreeTransform extends DivGroup {
 
             this.offsetX = this.x;
             this.offsetY = this.y;
+            this.offsetAxisX = this.rotationAxis.x;
+            this.offsetAxisY = this.rotationAxis.y;
 
             const o = this.rotationAxis.getBoundingRect();
             const axis = { x: o.x + o.width * 0.5, y: o.y + o.height * 0.5 };
             this.offsetOriginX = axis.x;
             this.offsetOriginY = axis.y;
+
+            const parent = this.parent.getBoundingRect();
+
+            let mx = e.clientX;
+            let my = e.clientY;
+
+            this.offsetDistX = mx - axis.x;
+            this.offsetDistY = my - axis.y;
+
+
+
         })
 
         this.border.addEventListener("mousedown", (e) => { moving = true; })
 
     }
+
+
+
+
+
+
+
+
+
 
 
     private setRotation(mouseEvent: any): void {
@@ -365,18 +452,23 @@ export class FreeTransform extends DivGroup {
 
         const d = this.getDistFromOppositePoint(mouseEvent);
         this.scaleX = this.offsetScaleX + (d - this.distFromOpposite) / (this.distFromOpposite / this.offsetScaleX);
+        this.updateAxis();
 
     }
     private setSizeY(mouseEvent: any): void {
         const d = this.getDistFromOppositePoint(mouseEvent);
         this.scaleY = this.offsetScaleY + (d - this.distFromOpposite) / (this.distFromOpposite / this.offsetScaleY);
+        this.updateAxis();
     }
     private setPosition(mouseEvent: any): void {
 
 
     }
 
-    public rotationAxisObj: any;
+
+
+
+
 
     private moveRotationAxis(mouseEvent: any): void {
         const parent = this.parent.html.getBoundingClientRect();
@@ -387,22 +479,14 @@ export class FreeTransform extends DivGroup {
         let my = (mouseEvent.clientY - parent.y - this.y) / this.scaleY;//- axis.y - axis.height * 0.5;
         let a = Math.atan2(my, mx);
         let d = Math.sqrt(mx * mx + my * my);
-
-        this.rotationAxisObj = {
-            mx,
-            my,
-            d,
-            a
-        }
-
         this.rotationAxis.x = this.offsetX2 + Math.cos(-r + a) * d;
         this.rotationAxis.y = this.offsetY2 + Math.sin(-r + a) * d;
         */
 
 
 
-        let mx = mouseEvent.clientX //- parent.x;
-        let my = mouseEvent.clientY //- parent.y;
+        let mx = mouseEvent.clientX - this.offsetDistX//- parent.x;
+        let my = mouseEvent.clientY - this.offsetDistY//- parent.y;
 
         let o = this.center.getBoundingRect();
         const center = { x: o.x + o.width * 0.5, y: o.y + o.height * 0.5 };
@@ -425,10 +509,52 @@ export class FreeTransform extends DivGroup {
         this.rotationAxis.y = Math.sin(-r + a) * d;
 
 
+        this.updateAxis();
+
+
+
+    }
+
+    private updateAxis(debugPt: any = null) {
+        const parent = this.parent.getBoundingRect();
+
+        let o = this.rotationAxis.getBoundingRect();
+        let axis = { x: o.x + o.width * 0.5, y: o.y + o.height * 0.5 };
+
+        o = this.center.getBoundingRect();
+        let center = { x: o.x + o.width * 0.5, y: o.y + o.height * 0.5 };
+
+        let dx = (axis.x - center.x);
+        let dy = (axis.y - center.y);
+        let d = Math.sqrt(dx * dx + dy * dy);
+        let a = Math.atan2(dy, dx);
+
+
+
+        if (debugPt) {
+
+            let x = -parent.x + center.x + Math.cos(a) * d;   // * this.scaleX;
+            let y = -parent.y + center.y + Math.sin(a) * d; //* this.scaleY;
+
+            x -= 4//debugPt.width * 0.5;
+            y -= 4//debugPt.height * 0.5;
+
+            debugPt.style.top = y + "px";
+            debugPt.style.left = x + "px";
+        }
+
+
+
+
+
     }
 
 
+    public debug(debugPt: UIElement = null) {
+        if (!this.parent || debugPt == null) return;
 
+        this.updateAxis(debugPt);
+    }
 
 
     public init(o: {
@@ -457,11 +583,9 @@ export class FreeTransform extends DivGroup {
         //this.border.align(new Pt2D(-0.5, -0.5))
 
         let w = this.width;
-        //w *= this.scaleX;
         w *= 0.5;
 
         let h = this.height;
-        //h *= this.scaleY;
         h *= 0.5;
 
 

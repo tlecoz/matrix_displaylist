@@ -1,0 +1,3 @@
+- mouseX/mouseY 
+- noScale 
+-change axis position while keeping position

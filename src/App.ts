@@ -1,3 +1,4 @@
+import { UIElement } from "./UIElement";
 import { DivElement } from "./display/DivElement";
 import { DivGroup } from "./display/DivGroup";
 import { StageDiv } from "./display/StageDiv";
@@ -8,11 +9,21 @@ export class App {
 
     private stage: StageDiv;
     private freeTransform: FreeTransform;
-
+    private debugPt: UIElement;
 
 
     constructor(w, h) {
         this.stage = new StageDiv(w, h, true)
+
+        this.debugPt = new UIElement("div", {
+            backgroundColor: "#ff0000",
+            borderRadius: "50%",
+            position: "absolute",
+            zIndex: Infinity,
+
+        })
+        this.debugPt.style.width = this.debugPt.style.height = 8 + "px";
+
 
         this.freeTransform = new FreeTransform();
 
@@ -20,6 +31,9 @@ export class App {
 
 
         this.stage.appendChild(this.freeTransform);
+
+        this.stage.html.appendChild(this.debugPt.html);
+
 
         this.freeTransform.init({
             x: 400,
@@ -36,7 +50,7 @@ export class App {
             y: 400,
             width: 200,
             height: 300,
-            scaleX: 1.5,
+            scaleX: 1,
             scaleY: 1,
             rotation: 0
         })
@@ -45,7 +59,7 @@ export class App {
     }
     public update() {
 
-
+        this.freeTransform.debug(this.debugPt);
         this.stage.drawElements()
     }
 

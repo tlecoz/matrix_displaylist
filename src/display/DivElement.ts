@@ -92,7 +92,7 @@ export class DivElement extends DivMatrix2D {
         this.inverseW = 1 / this.width;
         this.inverseH = 1 / this.height;
         let m: DOMMatrix = this.currentTransform = this.applyTransform();
-        this.html.style.transform = "matrix(" + m.a + "," + m.b + "," + m.c + "," + m.d + "," + m.e + "," + m.f + ")";
+        this.html.style.transform = m.toString();//"matrix(" + m.a + "," + m.b + "," + m.c + "," + m.d + "," + m.e + "," + m.f + ")";
 
     }
 
