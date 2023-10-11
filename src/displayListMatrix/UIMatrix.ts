@@ -32,6 +32,8 @@ export class UIMatrix extends UIElement {
 
     private boundingBox: DOMRect = new DOMRect();
 
+    public noScale: boolean = false;
+
     constructor(tag: string = "div", style?: any) {
         super(tag, {
             position: "absolute",
@@ -126,39 +128,22 @@ export class UIMatrix extends UIElement {
 
     public applyTransform(): DOMMatrix {
         const m: DOMMatrix = this.matrix;
+
+        let alignX = 0, alignY = 0;
         if (this.parent) {
-
-            const dx = this.alignFromContainer.x * this.parent.width;
-            const dy = this.alignFromContainer.y * this.parent.height;
-            const d = Math.sqrt(dx * dx + dy * dy);
-            const a = Math.atan2(dy, dx);
-            const r = a + this.globalRotation * Math.PI / 180;
-
-
-
-
+            alignX = this.alignFromContainer.x * this.parent.width;
+            alignY = this.alignFromContainer.y * this.parent.height;
             m.multiplySelf(this.parent);
-            m.translateSelf(this.x - this.align.x * this.width, this.y - this.align.y * this.height);
-            m.translateSelf(dx, dy)
-            m.rotateSelf(this.rotation);
-
-            m.translateSelf(-this.axis.x, -this.axis.y)
-            m.scaleSelf(this.scaleX, this.scaleY);
-
-
-
-        } else {
-            m.multiplySelf(this.parent);
-            m.translateSelf(this.x - this.align.x * this.width, this.y - this.align.y * this.height);
-            m.rotateSelf(this.rotation);
-            m.translateSelf(-this.axis.x, -this.axis.y)
-            m.scaleSelf(this.scaleX, this.scaleY);
         }
 
+        m.translateSelf(this.x - this.align.x * this.width + alignX, this.y - this.align.y * this.height + alignY);
+        m.rotateSelf(this.rotation);
+        m.translateSelf(-this.axis.x, -this.axis.y)
 
+        if (!this.noScale) m.scaleSelf(this.scaleX, this.scaleY);
+        else m.scaleSelf(1 / this.globalScaleX, 1 / this.globalScaleY);
 
         this.style.transform = "" + m;
-
         this.boundingBox = this.getBoundingRect();
         return m;
     }

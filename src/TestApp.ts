@@ -72,11 +72,11 @@ export class TestApp extends UIMatrixStage {
 
 
         }
-        oo.axis.x = 50
+        oo.axis.x = 0
         oo.align = Axis.CENTER;
         oo.alignFromContainer = Axis.CENTER;
         oo.style.backgroundColor = "#cccccc"
-
+        oo.noScale = true;
 
 
 
