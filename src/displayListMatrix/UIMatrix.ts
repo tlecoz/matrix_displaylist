@@ -67,33 +67,40 @@ export class UIMatrix extends UIElement {
 
         let x = this.axis.x * this.globalScaleX;
         let y = this.axis.y * this.globalScaleY;
-        let aa = Math.atan2(y, x);
-        let ad = Math.sqrt(x * x + y * y);
+        let axisAngle = Math.atan2(y, x);
+        let axisDist = Math.sqrt(x * x + y * y);
 
-        let cornerX = this.width * (this.align.x - 0.5) * this.globalScaleX //+ Math.cos(this.globalRotation * Math.PI / 180 + aa) * ad;
-        let cornerY = this.height * (this.align.y - 0.5) * this.globalScaleY// + Math.sin(this.globalRotation * Math.PI / 180 + aa) * ad;
+        let cornerX = this.width * (this.align.x - 0.5) * this.globalScaleX;
+        let cornerY = this.height * (this.align.y - 0.5) * this.globalScaleY;
         let cornerAngle = Math.atan2(cornerY, cornerX);
         let cornerDist = Math.sqrt(cornerX * cornerX + cornerY * cornerY);
 
         let px = cx + Math.cos(this.globalRotation * Math.PI / 180 + cornerAngle) * (cornerDist);
         let py = cy + Math.sin(this.globalRotation * Math.PI / 180 + cornerAngle) * (cornerDist);
 
-        px += Math.cos(this.globalRotation * Math.PI / 180 + aa) * ad;
-        py += Math.sin(this.globalRotation * Math.PI / 180 + aa) * ad;
+        px += Math.cos(this.globalRotation * Math.PI / 180 + axisAngle) * axisDist;
+        py += Math.sin(this.globalRotation * Math.PI / 180 + axisAngle) * axisDist;
 
+
+        let w, h, a, d;
         if (this.noScale) {
-            let w = (this.width - this.width * this.globalScaleX) * (-0.5 + this.align.x);
-            let h = (this.height - this.height * this.globalScaleY) * (-0.5 + this.align.y);
-            let a = Math.atan2(h, w);
-            let d = Math.sqrt(w * w + h * h);
-            console.log(this.align, w, h, d)
+            w = (this.width - this.width * this.globalScaleX) * (-0.5 + this.align.x);
+            h = (this.height - this.height * this.globalScaleY) * (-0.5 + this.align.y);
+            a = Math.atan2(h, w);
+            d = Math.sqrt(w * w + h * h);
+            //console.log(this.align, w, h, d)
             px += Math.cos(this.globalRotation * Math.PI / 180 + a) * d;
             py += Math.sin(this.globalRotation * Math.PI / 180 + a) * d;
         }
 
+        w = px - this.stage.mouseX;
+        h = py - this.stage.mouseY;
+        a = Math.atan2(h, w) + Math.PI;
+        d = Math.sqrt(w * w + h * h);
+
         return {
-            x: this.stage.mouseX - px,
-            y: this.stage.mouseY - py
+            x: Math.cos(-this.globalRotation * Math.PI / 180 + a) * d,
+            y: Math.sin(-this.globalRotation * Math.PI / 180 + a) * d,
         }
 
     }
