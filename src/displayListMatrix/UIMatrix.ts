@@ -82,10 +82,11 @@ export class UIMatrix extends UIElement {
         py += Math.sin(this.globalRotation * Math.PI / 180 + aa) * ad;
 
         if (this.noScale) {
-            let w = (this.width - this.width * this.globalScaleX) * 0.5;
-            let h = (this.height - this.height * this.globalScaleY) * 0.5;
+            let w = (this.width - this.width * this.globalScaleX) * (-0.5 + this.align.x);
+            let h = (this.height - this.height * this.globalScaleY) * (-0.5 + this.align.y);
             let a = Math.atan2(h, w);
             let d = Math.sqrt(w * w + h * h);
+            console.log(this.align, w, h, d)
             px += Math.cos(this.globalRotation * Math.PI / 180 + a) * d;
             py += Math.sin(this.globalRotation * Math.PI / 180 + a) * d;
         }
