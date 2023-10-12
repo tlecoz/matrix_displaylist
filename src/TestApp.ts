@@ -23,7 +23,7 @@ export class TestApp extends UIMatrixStage {
         o.scaleY = 1;
         o.width = 550;
         o.height = 550;
-        //o.axis.x = 100//-0.5 * o.width;
+        o.axis.x = 100//-0.5 * o.width;
         //o.axis.y = -0.5 * o.height;
         o.x = o.width * 0.5 * o.scaleX;
         o.y = o.height * 0.5 * o.scaleY;
@@ -72,9 +72,10 @@ export class TestApp extends UIMatrixStage {
 
 
         }
-        oo.axis.x = 0
-        oo.align = Axis.CENTER;
-        oo.alignFromContainer = Axis.CENTER;
+        oo.axis.x = 50
+        oo.align = Axis.BOTTOM_LEFT;
+        //oo.align = Axis.TOP_RIGHT;
+        oo.alignFromContainer = Axis.BOTTOM_LEFT;
         oo.style.backgroundColor = "#cccccc"
         oo.noScale = true;
 
@@ -99,14 +100,25 @@ export class TestApp extends UIMatrixStage {
         document.body.appendChild(item)
 
 
+        item = document.createElement("div");
+        item.style.position = "absolute";
+        item.style.top = "500px"
+        document.body.appendChild(item);
+
+
+        /*o.addEventListener("click", (e) => {
+            console.log(o.getBoundingRect())
+            console.log(o.mouseX, o.mouseY)
+        })*/
 
         this.onUpdate = () => {
             console.log(oo.mouseX, oo.mouseY);
+            item.innerText = Math.round(oo.mouseX) + " | " + Math.round(oo.mouseY)
             // console.log("mouse  = ", oo.mouseX, oo.mouseY)
 
             //oo.rotation++
             //obj.rotation++
-            //so.rotation += 0.25
+            //o.rotation += 0.25
         }
 
 

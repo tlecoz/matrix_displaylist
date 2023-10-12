@@ -57,27 +57,52 @@ export class UIMatrix extends UIElement {
         for (let i = 0; i < this.childs.length; i++) this.childs[i].stage = s;
     }
 
-    public get mouseX(): number {
+
+
+    public getMousePosition(): { x: number, y: number } {
+
+
+        let cy = this.boundingBox.y + this.boundingBox.height * 0.5;
         let cx = this.boundingBox.x + this.boundingBox.width * 0.5;
 
-        let cornerX = this.width * (this.align.x - 0.5) * this.globalScaleX;
-        let cornerY = this.height * (this.align.y - 0.5) * this.globalScaleY;
+        let x = this.axis.x * this.globalScaleX;
+        let y = this.axis.y * this.globalScaleY;
+        let aa = Math.atan2(y, x);
+        let ad = Math.sqrt(x * x + y * y);
+
+        let cornerX = this.width * (this.align.x - 0.5) * this.globalScaleX //+ Math.cos(this.globalRotation * Math.PI / 180 + aa) * ad;
+        let cornerY = this.height * (this.align.y - 0.5) * this.globalScaleY// + Math.sin(this.globalRotation * Math.PI / 180 + aa) * ad;
         let cornerAngle = Math.atan2(cornerY, cornerX);
         let cornerDist = Math.sqrt(cornerX * cornerX + cornerY * cornerY);
 
-        let px = cx + Math.cos(this.globalRotation * Math.PI / 180 + cornerAngle) * cornerDist;
-        return this.stage.mouseX - px;
+        let px = cx + Math.cos(this.globalRotation * Math.PI / 180 + cornerAngle) * (cornerDist);
+        let py = cy + Math.sin(this.globalRotation * Math.PI / 180 + cornerAngle) * (cornerDist);
+
+        px += Math.cos(this.globalRotation * Math.PI / 180 + aa) * ad;
+        py += Math.sin(this.globalRotation * Math.PI / 180 + aa) * ad;
+
+        if (this.noScale) {
+            let w = (this.width - this.width * this.globalScaleX) * 0.5;
+            let h = (this.height - this.height * this.globalScaleY) * 0.5;
+            let a = Math.atan2(h, w);
+            let d = Math.sqrt(w * w + h * h);
+            px += Math.cos(this.globalRotation * Math.PI / 180 + a) * d;
+            py += Math.sin(this.globalRotation * Math.PI / 180 + a) * d;
+        }
+
+        return {
+            x: this.stage.mouseX - px,
+            y: this.stage.mouseY - py
+        }
+
+    }
+
+    public get mouseX(): number {
+        return this.getMousePosition().x;
     }
     public get mouseY(): number {
 
-        let cy = this.boundingBox.y + this.boundingBox.height * 0.5;
-        let cornerX = this.width * (this.align.x - 0.5) * this.globalScaleX;
-        let cornerY = this.height * (this.align.y - 0.5) * this.globalScaleY;
-        let cornerAngle = Math.atan2(cornerY, cornerX);
-        let cornerDist = Math.sqrt(cornerX * cornerX + cornerY * cornerY);
-        let py = cy + Math.sin(this.globalRotation * Math.PI / 180 + cornerAngle) * cornerDist;
-
-        return this.stage.mouseY - py;
+        return this.getMousePosition().y;
     }
 
 
@@ -136,20 +161,49 @@ export class UIMatrix extends UIElement {
             m.multiplySelf(this.parent);
         }
 
-        m.translateSelf(this.x - this.align.x * this.width + alignX, this.y - this.align.y * this.height + alignY);
-        m.rotateSelf(this.rotation);
-        m.translateSelf(-this.axis.x, -this.axis.y)
 
-        if (!this.noScale) m.scaleSelf(this.scaleX, this.scaleY);
-        else m.scaleSelf(1 / this.globalScaleX, 1 / this.globalScaleY);
+        if (!this.noScale) {
+            m.translateSelf(this.x - this.align.x * this.width + alignX, this.y - this.align.y * this.height + alignY);
+            m.rotateSelf(this.rotation);
+            m.translateSelf(-this.axis.x, -this.axis.y)
+            m.scaleSelf(this.scaleX, this.scaleY);
+        } else {
+
+            const ratioX = 1 / this.globalScaleX;
+            const ratioY = 1 / this.globalScaleY;
+
+            const n = (this.width * 0.5 * this.globalScaleX - this.width * 0.5) * 0.5
+
+            m.translateSelf(this.x - this.align.x * this.width * ratioX - n + alignX, this.y - this.align.y * this.height * ratioY + alignY);
+            m.rotateSelf(this.rotation);
+            m.translateSelf(-this.axis.x, -this.axis.y)
+            //m.translateSelf((this.width * this.globalScaleX - this.width * (this.align.x)), (this.height * 0.5 * this.globalScaleY - this.height * (this.align.y + 0.5)))
+            m.scaleSelf(1 / this.globalScaleX, 1 / this.globalScaleY);
+        }
+
+
+
+
 
         this.style.transform = "" + m;
         this.boundingBox = this.getBoundingRect();
         return m;
     }
 
-    public get globalX(): number { return this.parent.globalX + this.x };
-    public get globalY(): number { return this.parent.globalY + this.y };
+    public get globalX(): number {
+        let x = this.x * this.parent.scaleX - this.parent.width * this.alignFromContainer.x;
+        let y = this.y * this.parent.scaleY - this.parent.height * this.alignFromContainer.y;;
+        let a = Math.atan2(y, x);
+        let d = Math.sqrt(x * x + y * y);
+        return this.parent.globalX + Math.cos(a) * d;
+    };
+    public get globalY(): number {
+        let x = this.x * this.parent.scaleX;
+        let y = this.y * this.parent.scaleY;
+        let a = Math.atan2(y, x);
+        let d = Math.sqrt(x * x + y * y);
+        return this.parent.globalX + Math.cos(a) * d;
+    };
     public get globalScaleX(): number { return this.parent.globalScaleX * this.scaleX };
     public get globalScaleY(): number { return this.parent.globalScaleY * this.scaleY };
     public get globalRotation(): number { return this.parent.globalRotation + this.rotation };
