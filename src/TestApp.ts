@@ -15,26 +15,31 @@ export class TestApp extends UIMatrixStage {
 
         let o = this.greenSquare = new UIMatrix("div", {
             backgroundColor: "rgba(0,255,0,0.5)",
-            width: '550px',
-            height: '550px'
+
         })
 
-        o.scaleX = 2;
+        o.scaleX = 1;
         o.scaleY = 1;
-        o.width = 550;
-        o.height = 550;
-        //o.axis.x = 300//-0.5 * o.width;
-        o.axis.y = 150//-0.5 * o.height;
-        o.x = o.width * 0.5 * o.scaleX;
-        o.y = o.height * 0.5 * o.scaleY;
-        o.rotation = 45;
+        o.width = 600;
+        o.height = 600;
+        o.axis.x = 0//-0.5 * o.width;
+        o.axis.y = 0//-0.5 * o.height;
+        o.x = 0 + o.width * 0.5 * o.scaleX;
+        o.y = 0 + o.height * 0.5 * o.scaleY;
+
+        //o.rotation = 45;
+
 
 
         o.align = Axis.CENTER;
 
         this.appendChild(o);
+        this.update();
+        let ori = o.getGlobalOrigin();
 
 
+
+        console.log("OO = ", o.x, o.y, ori)
 
 
 
@@ -72,7 +77,7 @@ export class TestApp extends UIMatrixStage {
 
 
         }
-        //oo.axis.x = 50
+        oo.axis.x = 50
         //oo.align = Axis.TOP_LEFT;
         //oo.align = Axis.TOP_RIGHT;
         oo.align = Axis.CENTER;
@@ -90,8 +95,8 @@ export class TestApp extends UIMatrixStage {
             obj.alignFromContainer = oo.align;
 
 
-            obj.x = target.axis.x + x / target.globalScaleX;
-            obj.y = target.axis.y + y / target.globalScaleY;
+            obj.x = x / target.globalScaleX;
+            obj.y = y / target.globalScaleY;
             obj.noScale = true;
             target.appendChild(obj);
         }
@@ -106,11 +111,11 @@ export class TestApp extends UIMatrixStage {
 
         let bool = false;
         this.greenSquare.addEventListener("click", (e) => {
-            //bool = true;
+            bool = true;
             this.greenSquare.moveRotationAxis(this.greenSquare.mouseX, this.greenSquare.mouseY);
             addObj(this.greenSquare, this.greenSquare.mouseX, this.greenSquare.mouseY);
 
-            this.greenSquare.rotation += 10;
+            //this.greenSquare.rotation += 10;
         })
 
         let item = document.createElement("div");
@@ -145,7 +150,7 @@ export class TestApp extends UIMatrixStage {
 
         this.onUpdate = () => {
             //console.log(this.greenSquare.mouseX, this.greenSquare.mouseY);
-            item.innerText = Math.round(o.mouseX) + " | " + Math.round(o.mouseY)
+            item.innerText = Math.round(this.greenSquare.mouseX) + " | " + Math.round(this.greenSquare.mouseY)
             // console.log("mouse  = ", oo.mouseX, oo.mouseY)
 
             //oo.rotation++

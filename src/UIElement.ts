@@ -104,7 +104,9 @@ export class UIElement {
         return element;
     }
 
-    public getBoundingRect(): DOMRect { return this.html.getBoundingClientRect() }
+    public getBoundingRect(): DOMRect {
+        return this.html.getBoundingClientRect()
+    }
 
     public addEventListener(eventName: string, func: any) {
         this.html.addEventListener(eventName, func)
