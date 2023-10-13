@@ -58,6 +58,59 @@ export class UIMatrix extends UIElement {
     }
 
 
+    public moveRotationAxis(x: number, y: number) {
+        /*
+        //ok sans axis : 
+
+        let a, d;
+        //a = Math.atan2(this.axis.y, this.axis.x);
+        //d = Math.sqrt(this.axis.x * this.axis.x + this.axis.y * this.axis.y);
+
+        let r = this.globalRotation * Math.PI / 180;
+        let dx = this.x / this.globalScaleX - x - this.width * this.align.x;
+        let dy = this.y / this.globalScaleY - y - this.height * this.align.y;
+        d = Math.sqrt(dx * dx + dy * dy);
+        a = Math.atan2(dy, dx) + Math.PI;
+
+
+        this.axis.x = x ;
+        this.axis.y = y ;
+
+
+
+        this.x += Math.cos(r + a) * d ;
+        this.y += Math.sin(r + a) * d ;
+        */
+
+        let ax = this.axis.x;
+        let ay = this.axis.y;
+        let aa = Math.atan2(ay, ax);
+        let ad = Math.sqrt(ax * ax + ay * ay);
+
+        let a, d;
+
+        let r = this.globalRotation * Math.PI / 180;
+        let dx = this.x / this.globalScaleX - x - this.width * this.align.x;
+        let dy = this.y / this.globalScaleY - y - this.height * this.align.y;
+        d = Math.sqrt(dx * dx + dy * dy);
+        a = Math.atan2(dy, dx) + Math.PI;
+
+
+        console.log("===> ", Math.cos(aa) * ad, Math.sin(aa) * ad)
+
+        this.axis.x += x// + Math.cos(aa) * ad;
+        this.axis.y += y// + Math.sin(aa) * ad;
+
+
+
+
+        this.x += Math.cos(r + a) * d //+ Math.cos(aa) * ad;
+        this.y += Math.sin(r + a) * d //+ Math.sin(aa) * ad;
+
+
+    }
+
+
 
     public getMousePosition(): { x: number, y: number } {
 

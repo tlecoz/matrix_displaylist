@@ -23,11 +23,11 @@ export class TestApp extends UIMatrixStage {
         o.scaleY = 1;
         o.width = 550;
         o.height = 550;
-        o.axis.x = 100//-0.5 * o.width;
-        //o.axis.y = -0.5 * o.height;
+        //o.axis.x = 300//-0.5 * o.width;
+        o.axis.y = 150//-0.5 * o.height;
         o.x = o.width * 0.5 * o.scaleX;
         o.y = o.height * 0.5 * o.scaleY;
-        o.rotation = 90;
+        o.rotation = 45;
 
 
         o.align = Axis.CENTER;
@@ -85,11 +85,13 @@ export class TestApp extends UIMatrixStage {
 
         const addObj = (target, x, y) => {
             let obj = new UIMatrix("div", { backgroundColor: "#ff00ff" });
-            obj.width = obj.height = 20;
+            obj.width = obj.height = 10;
             obj.align = Axis.CENTER;
             obj.alignFromContainer = oo.align;
-            obj.x = x; target.mouseX / target.globalScaleX;
-            obj.y = y;
+
+
+            obj.x = target.axis.x + x / target.globalScaleX;
+            obj.y = target.axis.y + y / target.globalScaleY;
             obj.noScale = true;
             target.appendChild(obj);
         }
@@ -98,7 +100,17 @@ export class TestApp extends UIMatrixStage {
 
 
         oo.addEventListener("click", (e) => {
-            addObj(oo, oo.mouseX / oo.globalScaleX, oo.mouseY / oo.globalScaleY)
+            addObj(oo, oo.mouseX, oo.mouseY)
+        })
+
+
+        let bool = false;
+        this.greenSquare.addEventListener("click", (e) => {
+            //bool = true;
+            this.greenSquare.moveRotationAxis(this.greenSquare.mouseX, this.greenSquare.mouseY);
+            addObj(this.greenSquare, this.greenSquare.mouseX, this.greenSquare.mouseY);
+
+            this.greenSquare.rotation += 10;
         })
 
         let item = document.createElement("div");
@@ -132,13 +144,13 @@ export class TestApp extends UIMatrixStage {
         })*/
 
         this.onUpdate = () => {
-            //console.log(oo.mouseX, oo.mouseY);
-            item.innerText = Math.round(oo.mouseX) + " | " + Math.round(oo.mouseY)
+            //console.log(this.greenSquare.mouseX, this.greenSquare.mouseY);
+            item.innerText = Math.round(o.mouseX) + " | " + Math.round(o.mouseY)
             // console.log("mouse  = ", oo.mouseX, oo.mouseY)
 
             //oo.rotation++
             //obj.rotation++
-            //o.rotation += 0.25
+            if (bool) o.rotation += 0.25
         }
 
 
