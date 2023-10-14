@@ -1,5 +1,8 @@
+import { DisplayElement } from "./display/DisplayElement";
+import { Stage } from "./display/Stage";
 import { DomMatrixElementStage } from "./displayListMatrix/DomMatrixElement";
 import { FreeTransform2 } from "./displayListMatrix/FreeTransform2";
+import { Align } from "./geom/Align";
 
 export class TestFreeTransform extends DomMatrixElementStage {
 
@@ -28,22 +31,52 @@ export class TestFreeTransform extends DomMatrixElementStage {
 
 
 
-
-        const center = document.createElement("div");
-        center.style.backgroundColor = "#6666ff";
-        center.style.outline = "solid 2px #ffffff"
-        center.style.width = "20px";
-        center.style.height = "20px";
-        center.style.position = "absolute";
-        center.style.left = (obj.x - 10) + "px";
-        center.style.top = (obj.y - 10) + "px";
-        center.style.zIndex = "0";
-
-        this.html.appendChild(center);
-
         const transform = new FreeTransform2();
         this.appendChild(transform);
         transform.init(obj)
+
+
+        //--------------------------
+
+        const stage = new Stage(1000, 1000);
+        this.html.appendChild(stage.canvas)
+
+        let bmp = document.createElement("canvas");
+        bmp.width = bmp.height = 150;
+        bmp.getContext("2d").fillStyle = "#0000ff";
+        bmp.getContext("2d").fillRect(0, 0, 150, 150);
+        bmp.getContext("2d").fillStyle = "#ff0000";
+        bmp.getContext("2d").font = "20px Arial"
+        bmp.getContext("2d").fillText("AAAAAAAA", 0, 20, 150)
+
+
+        const item = new DisplayElement(obj.width, obj.height);
+        item.rotation = obj.rotation;
+        item.scaleX = obj.scaleX;
+        item.scaleY = obj.scaleY;
+        item.xAxis = obj.axis.x;
+        item.yAxis = obj.axis.y;
+        item.x = obj.x;
+        item.y = obj.y;
+        item.align(Align.CENTER)
+
+
+        item.render = (ctx: CanvasRenderingContext2D) => {
+            ctx.scale(1 / bmp.width, 1 / bmp.height);
+            ctx.drawImage(bmp, 0, 0);
+
+        }
+
+        stage.appendChild(item);
+        stage.drawElements()
+
+
+
+        transform.addEventListener(FreeTransform2.CHANGED, () => {
+            item.init(transform.getMatrixInfos());
+            stage.drawElements()
+            //item.renderTransform(stage.context, transform.domMatrix);
+        })
 
 
 

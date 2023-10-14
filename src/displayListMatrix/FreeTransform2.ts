@@ -3,6 +3,13 @@ import { Axis, DomMatrixElement, MatrixInfos } from "./DomMatrixElement";
 
 export class FreeTransform2 extends DomMatrixElement {
 
+    public static RESIZED: string = "ON_RESIZED";
+    public static ROTATED: string = "ON_ROTATED";
+    public static MOVED: string = "ON_MOVED";
+    public static MOVED_AXIS: string = "ON_MOVED_AXIS";
+    public static CHANGED: string = "ON_CHANGED"
+
+
     protected top: DomMatrixElement;
     protected topLeft: DomMatrixElement;
     protected topRight: DomMatrixElement;
@@ -52,10 +59,13 @@ export class FreeTransform2 extends DomMatrixElement {
             this.resizing = this.resizingX = this.resizingY = this.movingAxis = this.rotating = this.moving = false;
         })
         document.body.addEventListener("mousemove", () => {
+
+
             if (this.resizing) this.applyResizing();
             else if (this.movingAxis) this.applyMoveRotationAxis();
             else if (this.rotating) this.applyRotation();
             else if (this.moving) this.applyMoving();
+
         })
     }
 
@@ -212,6 +222,9 @@ export class FreeTransform2 extends DomMatrixElement {
 
         this.inverseBorderAndButtonsScaleDimension();
         this.stage.update();
+
+        this.dispatchEvent(FreeTransform2.RESIZED);
+        this.dispatchEvent(FreeTransform2.CHANGED);
     }
 
 
@@ -229,8 +242,9 @@ export class FreeTransform2 extends DomMatrixElement {
         this.rotationAxisDisplay.x = this.rotationAxis.x = this.axis.x / this.scaleX;
         this.rotationAxisDisplay.y = this.rotationAxis.y = this.axis.y / this.scaleY;
 
-        console.log(this.mouseX, this.rotationAxisDisplay.x)
         this.stage.update();
+        this.dispatchEvent(FreeTransform2.MOVED_AXIS);
+        this.dispatchEvent(FreeTransform2.CHANGED);
     }
 
     //-------------------------------------------------------------------------------------------
@@ -244,6 +258,8 @@ export class FreeTransform2 extends DomMatrixElement {
         const data = this.currentBtn.data;
         this.x = this.stage.mouseX - data.mx;
         this.y = this.stage.mouseY - data.my;
+        this.dispatchEvent(FreeTransform2.MOVED);
+        this.dispatchEvent(FreeTransform2.CHANGED);
     }
 
     //-------------------------------------------------------------------------------------------
@@ -269,6 +285,8 @@ export class FreeTransform2 extends DomMatrixElement {
 
         this.rotation = data.offsetRotation + angle / (Math.PI / 180);
         this.stage.update();
+        this.dispatchEvent(FreeTransform2.ROTATED);
+        this.dispatchEvent(FreeTransform2.CHANGED);
     }
 
     //-------------------------------------------------------------------------------------------
@@ -318,7 +336,6 @@ export class FreeTransform2 extends DomMatrixElement {
         const label = new DomMatrixElement("div", {
             color: "#00ff00",
             fontSize: "25px",
-            backgroundColor: "#0000ff",
             padding: "15px",
             zIndex: "0",
             userSelect: "none",
@@ -329,6 +346,8 @@ export class FreeTransform2 extends DomMatrixElement {
         label.align = Axis.CENTER;
         label.alignFromContainer = Axis.CENTER;
         this.appendChild(label);
+
+        this.inverseBorderAndButtonsScaleDimension();
     }
 
 
