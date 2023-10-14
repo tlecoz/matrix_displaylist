@@ -68,33 +68,36 @@ export class FreeTransform2 extends DomMatrixElement {
         return Math.atan2(dy, dx);
     }
 
+    protected getSide(next: boolean, nb: number): { x: number, y: number } {
+        let btn = this.currentBtn;
+        if (next) for (let i = 0; i < nb; i++) btn = btn.data.next;
+        else for (let i = 0; i < nb; i++) btn = btn.data.prev;
+        return btn.getGlobalOrigin();;
+    }
+
     protected startResizing() {
 
         let sideA, sideB;
         const oppositeOrigin = this.currentBtn.data.opposite.getGlobalOrigin();
 
-        const getSide = (next: boolean, nb: number) => {
-            let btn = this.currentBtn;
-            if (next) for (let i = 0; i < nb; i++) btn = btn.data.next;
-            else for (let i = 0; i < nb; i++) btn = btn.data.prev;
 
-            btn.style.backgroundColor = "#ff0000"
-            return btn.getGlobalOrigin();;
-        }
+
+
+
 
         if (this.resizeFromCenter) {
             this.rotationAxis.x = this.rotationAxis.y = 0;
-            sideA = getSide(true, 2);
-            sideB = getSide(false, 2);
+            sideA = this.getSide(true, 2);
+            sideB = this.getSide(false, 2);
         } else {
-
+            //resize from the opposite point
             let nb = 3;
             const isCorner = this.isCorner(this.currentBtn);
             if (isCorner) nb = 2;
 
 
-            sideA = getSide(true, nb);
-            sideB = getSide(false, nb);
+            sideA = this.getSide(true, nb);
+            sideB = this.getSide(false, nb);
 
             if (isCorner) {
                 const angle = this.getAngle(sideA, sideB);
@@ -105,7 +108,7 @@ export class FreeTransform2 extends DomMatrixElement {
                 }
             }
 
-            //resize from the opposite point
+
             this.rotationAxis.x = this.currentBtn.data.opposite.x;
             this.rotationAxis.y = this.currentBtn.data.opposite.y;
 
@@ -122,6 +125,8 @@ export class FreeTransform2 extends DomMatrixElement {
         data.sens = this.getSens({ x: this.stage.mouseX, y: this.stage.mouseY }, sideA, sideB)
         data.dist = this.getDistance({ x: this.stage.mouseX, y: this.stage.mouseY }, axis);
         data.axisOrigin = axis;
+        data.offsetScaleX = this.scaleX;
+        data.offsetScaleY = this.scaleY;
 
         data.btnOrigin = this.currentBtn.getGlobalOrigin();
         data.oppositeOrigin = oppositeOrigin;//this.currentBtn.data.opposite.getGlobalOrigin();
@@ -175,9 +180,12 @@ export class FreeTransform2 extends DomMatrixElement {
 
         }
 
-        if (this.resizingX) this.scaleX = resizingScale;
-        else if (this.resizingY) this.scaleY = resizingScale;
-        else this.scaleX = this.scaleY = resizingScale;
+        if (this.resizingX) this.scaleX = data.offsetScaleX * resizingScale;
+        else if (this.resizingY) this.scaleY = data.offsetScaleY * resizingScale;
+        else {
+            this.scaleX = data.offsetScaleX * resizingScale;
+            this.scaleY = data.offsetScaleY * resizingScale;
+        }
 
         if (this.resizeFromCenter == false) {
             this.x = opposite.x + Math.cos(offsetAngle + data.angle) * (dist * 0.5);
