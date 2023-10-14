@@ -111,7 +111,6 @@ export class FreeTransform2 extends DomMatrixElement {
 
         }
 
-        //this.moveRotationAxis(this.rotationAxis.x, this.rotationAxis.y);
 
         //update the points with the new axis position
         this.stage.update();
@@ -119,8 +118,7 @@ export class FreeTransform2 extends DomMatrixElement {
 
         const data = this.currentBtn.data;
         const axis = this.rotationAxis.getGlobalOrigin();
-        //const sideA = data.sideA.getGlobalOrigin();
-        //const sideB = data.sideB.getGlobalOrigin();
+
         data.sens = this.getSens({ x: this.stage.mouseX, y: this.stage.mouseY }, sideA, sideB)
         data.dist = this.getDistance({ x: this.stage.mouseX, y: this.stage.mouseY }, axis);
         data.axisOrigin = axis;
@@ -201,10 +199,26 @@ export class FreeTransform2 extends DomMatrixElement {
     }
 
     protected startRotation() {
+        const data = this.currentBtn.data;
+        data.axis = this.rotationAxis.getGlobalOrigin();
+        data.offsetRotation = this.rotation;
+        data.offsetAngle = this.getAngle({
+            x: this.stage.mouseX,
+            y: this.stage.mouseY
+        }, data.axis)
 
+        console.log(data)
     }
     protected applyRotation() {
+        const data = this.currentBtn.data;
+        const angle = this.getAngle({
+            x: this.stage.mouseX,
+            y: this.stage.mouseY
+        }, data.axis) - data.offsetAngle;
 
+
+        this.rotation = data.offsetRotation + angle / (Math.PI / 180);
+        this.stage.update();
     }
 
 
@@ -336,10 +350,12 @@ export class FreeTransform2 extends DomMatrixElement {
         }
         const moveAxis = (btn: DomMatrixElement) => {
             this.currentBtn = btn;
+            this.movingAxis = true;
             this.startMoveRotationAxis();
         }
         const rotate = (btn: DomMatrixElement) => {
             this.currentBtn = btn;
+            this.rotating = true;
             this.startRotation();
         }
 
