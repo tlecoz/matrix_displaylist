@@ -18,12 +18,12 @@ export class TestFreeTransform extends DomMatrixElementStage {
         const obj = {
             x: 600,
             y: 300,
-            rotation: 40,
+            rotation: 0,
             scaleX: 1,
             scaleY: 1,
             width: 200,
             height: 300,
-            axis: new DOMPoint(50, 0)
+            axis: new DOMPoint(0, 0)
         }
 
 
@@ -42,9 +42,10 @@ export class TestFreeTransform extends DomMatrixElementStage {
         this.html.appendChild(center);
 
         const transform = new FreeTransform2();
+        this.appendChild(transform);
         transform.init(obj)
 
-        this.appendChild(transform);
+
 
     }
 

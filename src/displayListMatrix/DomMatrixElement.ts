@@ -78,6 +78,8 @@ export class DomMatrixElement extends UIElement {
         r.y -= this.stage.screenY;
         //}
 
+        //console.log("getBoundingRect = ", r)
+
         return r;
     }
 
