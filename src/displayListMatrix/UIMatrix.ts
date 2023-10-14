@@ -59,77 +59,28 @@ export class UIMatrix extends UIElement {
 
     public getBoundingRect(): DOMRect {
         const r = this.html.getBoundingClientRect();
-        const s = this.stage.html.getBoundingClientRect();
+        //if (this.parent == this.stage) {
+        r.x -= this.stage.screenX;
+        r.y -= this.stage.screenY;
+        //}
 
-        r.x -= this.stage.screenX;//s.x;
-        r.y -= this.stage.screenY;//s.y;
-
-        //r.x -= this.stage.screenX;
-        //r.y -= this.stage.screenY;
         return r;
     }
 
     public moveRotationAxis(x: number, y: number) {
-        /*
-        //ok sans axis : 
-
-        let a, d;
-        //a = Math.atan2(this.axis.y, this.axis.x);
-        //d = Math.sqrt(this.axis.x * this.axis.x + this.axis.y * this.axis.y);
-
-        let r = this.globalRotation * Math.PI / 180;
-        let dx = this.x / this.globalScaleX - x - this.width * this.align.x;
-        let dy = this.y / this.globalScaleY - y - this.height * this.align.y;
-        d = Math.sqrt(dx * dx + dy * dy);
-        a = Math.atan2(dy, dx) + Math.PI;
 
 
-        this.axis.x = x ;
-        this.axis.y = y ;
-
-
-
-        this.x += Math.cos(r + a) * d ;
-        this.y += Math.sin(r + a) * d ;
-        */
-
-
-
-        let dx = x;
-        let dy = y;
+        let dx = this.axis.x - x;
+        let dy = this.axis.y - y;
         let a = Math.atan2(dy, dx) + Math.PI;
         let d = Math.sqrt(dx * dx + dy * dy);
 
-
-
-
-        let origin = this.getGlobalOrigin();
-        //this.x -= (x / this.globalScaleX - origin.x);
-        //this.y -= (y / this.globalScaleY - origin.y);
-
-        //console.log(x, y, origin)
         let r = this.globalRotation * Math.PI / 180;
-        let ax = this.axis.x * this.globalScaleX;
-        let ay = this.axis.y * this.globalScaleY;
-        //let a = Math.atan2(ay, ax);
-        //let d = Math.sqrt(ax * ax + ay * ay);
-        this.x += Math.cos(a) * d;
-        this.y += Math.sin(a) * d;
+        this.x += Math.cos(r + a) * d;
+        this.y += Math.sin(r + a) * d;
 
         this.axis.x = x
         this.axis.y = y
-        /*
-        let dx2 = x - this.x / this.globalScaleX// - this.axis.x * this.globalScaleX;
-        let dy2 = y - this.y / this.globalScaleY// - this.axis.y * this.globalScaleY;
-        let d = Math.sqrt(dx2 * dx2 + dy2 * dy2);
-        let a = Math.atan2(dy2, dx2);
-        
-
-
-
-        this.x += Math.cos(a) * d;
-        this.y += Math.sin(a) * d;
-        */
 
     }
 
@@ -137,12 +88,6 @@ export class UIMatrix extends UIElement {
         let cy = this.boundingBox.y + this.boundingBox.height * 0.5;
         let cx = this.boundingBox.x + this.boundingBox.width * 0.5;
 
-        //console.log(this.boundingBox)
-
-        let x = this.axis.x * this.globalScaleX;
-        let y = this.axis.y * this.globalScaleY;
-        let axisAngle = Math.atan2(y, x);
-        let axisDist = Math.sqrt(x * x + y * y);
 
         let cornerX = this.width * (this.align.x - 0.5) * this.globalScaleX;
         let cornerY = this.height * (this.align.y - 0.5) * this.globalScaleY;
@@ -152,17 +97,13 @@ export class UIMatrix extends UIElement {
         let px = cx + Math.cos(this.globalRotation * Math.PI / 180 + cornerAngle) * (cornerDist);
         let py = cy + Math.sin(this.globalRotation * Math.PI / 180 + cornerAngle) * (cornerDist);
 
-        //px += Math.cos(this.globalRotation * Math.PI / 180 + axisAngle) * axisDist;
-        //py += Math.sin(this.globalRotation * Math.PI / 180 + axisAngle) * axisDist;
-
-
         let w, h, a, d;
         if (this.noScale) {
             w = (this.width - this.width * this.globalScaleX) * (-0.5 + this.align.x);
             h = (this.height - this.height * this.globalScaleY) * (-0.5 + this.align.y);
             a = Math.atan2(h, w);
             d = Math.sqrt(w * w + h * h);
-            //console.log(this.align, w, h, d)
+
             px += Math.cos(this.globalRotation * Math.PI / 180 + a) * d;
             py += Math.sin(this.globalRotation * Math.PI / 180 + a) * d;
         }
@@ -431,7 +372,6 @@ export class UIMatrixStage extends UIMatrix {
 
     private getScreenPosition(): void {
         const rect: DOMRect = this.getBoundingRect();
-        console.log("stage rect = ", rect)
         this.screenX = rect.x;
         this.screenY = rect.y;
 

@@ -18,16 +18,16 @@ export class TestApp extends UIMatrixStage {
 
         })
 
-        o.scaleX = 1;
+        o.scaleX = 2;
         o.scaleY = 1;
-        o.width = 600;
-        o.height = 600;
-        o.axis.x = 0//-0.5 * o.width;
-        o.axis.y = 0//-0.5 * o.height;
-        o.x = 0 + o.width * 0.5 * o.scaleX;
-        o.y = 0 + o.height * 0.5 * o.scaleY;
+        o.width = 550;
+        o.height = 550;
+        o.axis.x = 78//-0.5 * o.width;
+        o.axis.y = 110//-0.5 * o.height;
+        o.x = 123 + o.width * 0.5 * o.scaleX;
+        o.y = 159 + o.height * 0.5 * o.scaleY;
 
-        //o.rotation = 45;
+        o.rotation = 45;
 
 
 
@@ -139,7 +139,7 @@ export class TestApp extends UIMatrixStage {
 
         item = document.createElement("div");
         item.style.position = "absolute";
-        item.style.top = "500px"
+        item.style.top = "700px"
         document.body.appendChild(item);
 
 
