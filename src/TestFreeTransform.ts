@@ -23,7 +23,7 @@ export class TestFreeTransform extends DomMatrixElementStage {
             scaleY: 1,
             width: 200,
             height: 300,
-            axis: new DOMPoint(0, 0)
+            axis: new DOMPoint(50, 0)
         }
 
 

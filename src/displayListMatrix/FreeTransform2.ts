@@ -12,7 +12,14 @@ export class FreeTransform2 extends DomMatrixElement {
     protected bottomLeft: DomMatrixElement;
     protected bottomRight: DomMatrixElement;
     protected center: DomMatrixElement;
+
+
+    //during the resize, I move the rotationAxis to the center
+    //in order to simplify the computations, but the displayElemnt should stay at its place
+    //that's why I use 2 DomMatrixelement to represent the axis (one for computation and another for display)
     protected rotationAxis: DomMatrixElement;
+    protected rotationAxisDisplay: DomMatrixElement;
+
     protected rotationBtn: DomMatrixElement;
 
 
@@ -35,6 +42,11 @@ export class FreeTransform2 extends DomMatrixElement {
         this.html.style.zIndex = "" + 999999;
         this.createButtons();
         document.body.addEventListener("mouseup", () => {
+
+            if (this.resizing) {
+                this.rotationAxis.x = this.rotationAxisDisplay.x;
+                this.rotationAxis.y = this.rotationAxisDisplay.y;
+            }
             this.resizing = this.resizingX = this.resizingY = this.movingAxis = this.rotating = false;
         })
         document.body.addEventListener("mousemove", () => {
@@ -56,12 +68,18 @@ export class FreeTransform2 extends DomMatrixElement {
     }
 
     protected startResizing() {
+
+        this.rotationAxis.x = this.rotationAxis.y = 0;
+        this.stage.update();
+
+
         const data = this.currentBtn.data;
         const axis = this.rotationAxis.getGlobalOrigin();
         const sideA = data.sideA.getGlobalOrigin();
         const sideB = data.sideB.getGlobalOrigin();
         data.sens = this.getSens({ x: this.stage.mouseX, y: this.stage.mouseY }, sideA, sideB)
         data.dist = this.getDistance({ x: this.stage.mouseX, y: this.stage.mouseY }, axis);
+
 
         //we keep the absolute values during startResizing and use them later in applyResizing
         //so even if if the scaleX/scaleY change its sign, it won't affect these values 
@@ -160,15 +178,16 @@ export class FreeTransform2 extends DomMatrixElement {
             this.axis.x = this.axis.y = 0;
         }
 
-        this.rotationAxis.x = this.axis.x;
-        this.rotationAxis.y = this.axis.y;
 
         const buttons = this.buttons;
         for (let i = 0; i < buttons.length; i++) {
             buttons[i].x = buttons[i].data.position.x * obj.width;
             buttons[i].y = buttons[i].data.position.y * obj.height;
-
         }
+
+        this.rotationAxis.x = this.rotationAxisDisplay.x = this.axis.x;
+        this.rotationAxis.y = this.rotationAxisDisplay.y = this.axis.y;
+        console.log("init ", this.rotationAxis.x, this.rotationAxis.y)
     }
 
     private getClosestPointOnLine(mouseX: number, mouseY: number, p0: { x: number, y: number }, p1: { x: number, y: number }) {
@@ -278,7 +297,8 @@ export class FreeTransform2 extends DomMatrixElement {
 
 
         const axisSize = 14;
-        this.rotationAxis = buttons[nb++] = createButton(axisSize, moveAxis, Axis.CENTER, { backgroundColor: "#66ff66" })
+        this.rotationAxis = buttons[nb++] = createButton(axisSize, moveAxis, Axis.CENTER, { backgroundColor: "transparent", border: "", width: "1px", height: "1px" })
+        this.rotationAxisDisplay = buttons[nb++] = createButton(axisSize, moveAxis, Axis.CENTER, { backgroundColor: "#66ff66" })
 
         const rotationBtnSize = 18;
         this.rotationBtn = buttons[nb++] = createButton(rotationBtnSize, rotate, Axis.TOP);
