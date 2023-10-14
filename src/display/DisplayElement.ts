@@ -47,6 +47,7 @@ export class DisplayElement extends Matrix2D {
         this.height = obj.height;
         this.rotation = obj.rotation;
         this.scaleX = obj.scaleX;
+        this.scaleY = obj.scaleY;
 
         this.xAxis = obj.axis.x;
         this.yAxis = obj.axis.y;
@@ -57,19 +58,7 @@ export class DisplayElement extends Matrix2D {
     public moveRotationAxis(x: number, y: number) {
 
 
-        let dx = (this.xAxis) - x;
-        let dy = (this.yAxis) - y;
-        let a = Math.atan2(dy, dx) //+ Math.PI;
-        let d = Math.sqrt(dx * dx + dy * dy);
 
-        let r = this.globalRotation * Math.PI / 180;
-
-        console.log(dx, dy)
-
-        //this.x += this.xAxis;
-        //this.y -= this.yAxis;
-        //this.x -= Math.cos(r + a) * d;
-        //this.y -= Math.sin(r + a) * d;
 
         this.xAxis = x / this.scaleX + this.width * 0.5
         this.yAxis = y / this.scaleY + this.height * 0.5

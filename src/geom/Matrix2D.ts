@@ -108,13 +108,6 @@ export class Matrix2D extends EventDispatcher {
     public applyTransform(): DOMMatrix {
         const m: DOMMatrix = this.matrix;
 
-        /*
-         m.translateSelf(this.x - this.align.x * this.width + alignX, this.y - this.align.y * this.height + alignY);
-            m.rotateSelf(this.rotation);
-            m.translateSelf(-this.axis.x, -this.axis.y)
-            m.scaleSelf(this.scaleX, this.scaleY);
-        */
-
         m.translateSelf(this.x, this.y);
         m.rotateSelf(this.rotation);
         m.translateSelf(-this.xAxis * this.scaleX, -this.yAxis * this.scaleY)
