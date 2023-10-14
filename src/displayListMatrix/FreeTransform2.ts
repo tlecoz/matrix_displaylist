@@ -34,7 +34,7 @@ export class FreeTransform2 extends DomMatrixElement {
     protected moving: boolean = false;
     protected currentBtn: DomMatrixElement;
     //---------
-    public resizeFromCenter: boolean = false;
+    public resizeFromCenter: boolean = true;
 
     constructor() {
         super("div", {
@@ -59,23 +59,9 @@ export class FreeTransform2 extends DomMatrixElement {
         })
     }
 
-    protected getDistance(a: { x: number, y: number }, b: { x: number, y: number }): number {
-        let dx = a.x - b.x;
-        let dy = a.y - b.y;
-        return Math.sqrt(dx * dx + dy * dy);
-    }
-    protected getAngle(a: { x: number, y: number }, b: { x: number, y: number }): number {
-        let dx = a.x - b.x;
-        let dy = a.y - b.y;
-        return Math.atan2(dy, dx);
-    }
 
-    protected getSide(next: boolean, nb: number): { x: number, y: number } {
-        let btn = this.currentBtn;
-        if (next) for (let i = 0; i < nb; i++) btn = btn.data.next;
-        else for (let i = 0; i < nb; i++) btn = btn.data.prev;
-        return btn.getGlobalOrigin();;
-    }
+
+    //-------------------------------------------------------------------------------------------
 
     protected startResizing() {
 
@@ -83,7 +69,48 @@ export class FreeTransform2 extends DomMatrixElement {
         const oppositeOrigin = this.currentBtn.data.opposite.getGlobalOrigin();
 
 
+        /*
+        The resize process is a bit complex, I'll explain it with an example : 
+        
+        Let say I'm dragging the "top" button. 
+        The opposite button would be the "bottom" button. 
+        These 2 points create an imaginary line. 
+        
+        I get the position of closest point on that line from the mouse
+        and use that point of mouse position in order to get the minimal distance
+        between the "top" and the "bottom" buttons  
 
+
+        rotationAxis is an invisible DomMatrixElement . 
+        I use it as a point but because it's contained in the FreeTransform, 
+        it allows me to place it easyly without taking care of the transformation from the parent 
+
+        if we resize from the center, I move rotationAxis to the center
+        if not, we resize from the opposite point, so I move rotationAxis to the opposite point.
+
+        during startResizing, we store the dist between the "top" and the "bottom" buttons
+        then, in applyResizing, we compute the distance between the mouse position on the line and the rotationAxis
+        then we divide it by the start dist to get the scale 
+        
+        in order to know when we must reverse the scale, we need 2 extra points that I called sideA and sideB 
+        sideA and sideB create an imaginary line that is perpendicular to our first line. 
+
+        In our case, sideA and sideB would be "left" and "right" 
+
+        The points are structured as a linked-list and have a property "next" and "prev" allowing to traverse the points. 
+
+        if we resize from the center, the sideA and sideB are always 2 points after and previous the current point.
+        if we resize from the opposite side, it's a bit more complex : 
+            - if the current point is not a corner, the perpendicular line should pass by the opposite point, 
+            so it's 3 points after the current point.
+            - if the current point is a corner, we first get the points located 2 points after and before the current point
+              with them, we compute the angle that we will use to create a line from the opposite point to an arbitrary distance of 200px 
+              in the direction of the angle
+
+        
+        We can now determine a binay orientation (1 or -1) between the mouse position and that line in order to know when we cross it. 
+        When we cross it, we must inverse the scale. 
+        */
 
 
 
@@ -116,7 +143,6 @@ export class FreeTransform2 extends DomMatrixElement {
 
         }
 
-
         //update the points with the new axis position
         this.stage.update();
 
@@ -141,19 +167,6 @@ export class FreeTransform2 extends DomMatrixElement {
         //so even if if the scaleX/scaleY change its sign, it won't affect these values 
         data.sideAOrigin = sideA;
         data.sideBOrigin = sideB;
-    }
-
-    private inverseBorderAndButtonsScaleDimension() {
-        this.border.width = Math.abs(this.width * this.scaleX);
-        this.border.height = Math.abs(this.height * this.scaleY);
-        this.border.scaleX = 1 / this.scaleX;
-        this.border.scaleY = 1 / this.scaleY;
-
-
-        for (let i = 0; i < this.buttons.length; i++) {
-            this.buttons[i].scaleX = 1 / this.scaleX;
-            this.buttons[i].scaleY = 1 / this.scaleY;
-        }
     }
 
 
@@ -202,7 +215,7 @@ export class FreeTransform2 extends DomMatrixElement {
     }
 
 
-
+    //-------------------------------------------------------------------------------------------
 
     protected startMoveRotationAxis() {
         const data = this.currentBtn.data;
@@ -220,6 +233,7 @@ export class FreeTransform2 extends DomMatrixElement {
         this.stage.update();
     }
 
+    //-------------------------------------------------------------------------------------------
 
     protected startMoving() {
         const data = this.currentBtn.data;
@@ -232,7 +246,7 @@ export class FreeTransform2 extends DomMatrixElement {
         this.y = this.stage.mouseY - data.my;
     }
 
-
+    //-------------------------------------------------------------------------------------------
 
 
     protected startRotation() {
@@ -256,6 +270,8 @@ export class FreeTransform2 extends DomMatrixElement {
         this.rotation = data.offsetRotation + angle / (Math.PI / 180);
         this.stage.update();
     }
+
+    //-------------------------------------------------------------------------------------------
 
 
     public init(obj: MatrixInfos) {
@@ -315,6 +331,9 @@ export class FreeTransform2 extends DomMatrixElement {
         this.appendChild(label);
     }
 
+
+    //-------------------------------------------------------------------------------------------
+
     private getClosestPointOnLine(mouseX: number, mouseY: number, p0: { x: number, y: number }, p1: { x: number, y: number }) {
         const dx = p1.x - p0.x;
         const dy = p1.y - p0.y;
@@ -345,9 +364,44 @@ export class FreeTransform2 extends DomMatrixElement {
         }
     }
 
+    protected getDistance(a: { x: number, y: number }, b: { x: number, y: number }): number {
+        let dx = a.x - b.x;
+        let dy = a.y - b.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+    protected getAngle(a: { x: number, y: number }, b: { x: number, y: number }): number {
+        let dx = a.x - b.x;
+        let dy = a.y - b.y;
+        return Math.atan2(dy, dx);
+    }
+
+    protected getSide(next: boolean, nb: number): { x: number, y: number } {
+        //the points are a kind of linked-list
+        //you can access to the point after/previous the current point 
+        //the param "next" tell us the direction ; "nb" how much point there are from the required point 
+
+        let btn = this.currentBtn;
+        if (next) for (let i = 0; i < nb; i++) btn = btn.data.next;
+        else for (let i = 0; i < nb; i++) btn = btn.data.prev;
+        return btn.getGlobalOrigin();;
+    }
+
+
+    private inverseBorderAndButtonsScaleDimension() {
+        this.border.width = Math.abs(this.width * this.scaleX);
+        this.border.height = Math.abs(this.height * this.scaleY);
+        this.border.scaleX = 1 / this.scaleX;
+        this.border.scaleY = 1 / this.scaleY;
+
+        for (let i = 0; i < this.buttons.length; i++) {
+            this.buttons[i].scaleX = 1 / this.scaleX;
+            this.buttons[i].scaleY = 1 / this.scaleY;
+        }
+    }
+
+    //-------------------------------------------------------------------------------------------
+
     protected createButtons() {
-
-
 
         const createButton = (size: number, func: (btn: DomMatrixElement) => void, axis?: DOMPoint, style?: any) => {
 
@@ -371,7 +425,6 @@ export class FreeTransform2 extends DomMatrixElement {
             })
 
             this.appendChild(btn);
-
             return btn;
         }
 
@@ -380,10 +433,7 @@ export class FreeTransform2 extends DomMatrixElement {
             this.resizing = true;
             this.resizingX = btn == this.left || btn == this.right;
             this.resizingY = btn == this.top || btn == this.bottom;
-
             this.startResizing();
-
-
         }
         const moveAxis = (btn: DomMatrixElement) => {
             this.currentBtn = btn;
@@ -425,13 +475,6 @@ export class FreeTransform2 extends DomMatrixElement {
         this.left = buttons[nb++] = createButton(anchorSize, resize, Axis.LEFT);
         this.topLeft = buttons[nb++] = createButton(anchorSize, resize, Axis.TOP_LEFT);
 
-
-
-
-
-
-
-
         for (let i = 0; i < nb; i++) {
             buttons[i].data.next = buttons[(i + 1) % nb];
             if (i == 0) buttons[i].data.prev = buttons[nb - 1];
@@ -451,8 +494,6 @@ export class FreeTransform2 extends DomMatrixElement {
         setOpposite(this.left, this.right, this.top, this.bottom);
         setOpposite(this.bottomLeft, this.topRight, this.topLeft, this.bottomRight);
 
-
-
         const axisSize = 14;
         this.rotationAxis = buttons[nb++] = createButton(0, moveAxis, Axis.CENTER, { backgroundColor: "transparent", border: "" })
         this.rotationAxisDisplay = buttons[nb++] = createButton(axisSize, moveAxis, Axis.CENTER, { backgroundColor: "#66ff66" })
@@ -460,16 +501,6 @@ export class FreeTransform2 extends DomMatrixElement {
         const rotationBtnSize = 18;
         this.rotationBtn = buttons[nb++] = createButton(rotationBtnSize, rotate, Axis.TOP);
         this.rotationBtn.axis.y = 30;
-
-
-
-
-
-
-
-
-
-
 
     }
 
