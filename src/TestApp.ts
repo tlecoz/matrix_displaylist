@@ -1,9 +1,9 @@
-import { Axis, UIMatrix, UIMatrixStage } from "./displayListMatrix/UIMatrix";
+import { Axis, DomMatrixElement, DomMatrixElementStage } from "./displayListMatrix/DomMatrixElement";
 
-export class TestApp extends UIMatrixStage {
+export class TestApp extends DomMatrixElementStage {
 
 
-    private greenSquare: UIMatrix;
+    private greenSquare: DomMatrixElement;
 
 
     constructor() {
@@ -13,7 +13,7 @@ export class TestApp extends UIMatrixStage {
 
 
 
-        let o = this.greenSquare = new UIMatrix("div", {
+        let o = this.greenSquare = new DomMatrixElement("div", {
             backgroundColor: "rgba(0,255,0,0.5)",
 
         })
@@ -54,7 +54,7 @@ export class TestApp extends UIMatrixStage {
 
             for (let j = 0; j < 2; j++) {
 
-                obj = new UIMatrix("div", { backgroundColor: "#ff0000", })
+                obj = new DomMatrixElement("div", { backgroundColor: "#ff0000", })
 
 
                 obj.width = 200;
@@ -64,7 +64,7 @@ export class TestApp extends UIMatrixStage {
                 obj.y = (50 + j * (obj.height + 50));
 
 
-                oo = new UIMatrix("div", { backgroundColor: "#0000ff" })
+                oo = new DomMatrixElement("div", { backgroundColor: "#0000ff" })
                 oo.width = oo.height = 50;
                 //oo.x = 50;
                 obj.appendChild(oo);
@@ -89,7 +89,7 @@ export class TestApp extends UIMatrixStage {
 
 
         const addObj = (target, x, y) => {
-            let obj = new UIMatrix("div", { backgroundColor: "#ff00ff" });
+            let obj = new DomMatrixElement("div", { backgroundColor: "#ff00ff" });
             obj.width = obj.height = 10;
             obj.align = Axis.CENTER;
             obj.alignFromContainer = oo.align;

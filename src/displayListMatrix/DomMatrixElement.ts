@@ -13,10 +13,10 @@ export class Axis {
 
 
 
-export class UIMatrix extends UIElement {
+export class DomMatrixElement extends UIElement {
 
 
-    private _stage: UIMatrixStage = null;
+    private _stage: DomMatrixElementStage = null;
 
     public axis: DOMPoint;
     public align: DOMPoint;
@@ -26,7 +26,7 @@ export class UIMatrix extends UIElement {
     public scaleX: number = 1;
     public scaleY: number = 1;
 
-    public childs: UIMatrix[] = [];
+    public childs: DomMatrixElement[] = [];
     protected matrix: DOMMatrix;
     public onUpdate: () => void;
 
@@ -49,10 +49,10 @@ export class UIMatrix extends UIElement {
 
     }
 
-    public get stage(): UIMatrixStage {
+    public get stage(): DomMatrixElementStage {
         return this._stage;
     }
-    public set stage(s: UIMatrixStage) {
+    public set stage(s: DomMatrixElementStage) {
         this._stage = s;
         for (let i = 0; i < this.childs.length; i++) this.childs[i].stage = s;
     }
@@ -117,40 +117,8 @@ export class UIMatrix extends UIElement {
 
     public getMousePosition(): { x: number, y: number } {
 
-        /*
-        let cy = this.boundingBox.y + this.boundingBox.height * 0.5;
-        let cx = this.boundingBox.x + this.boundingBox.width * 0.5;
 
-        let x = this.axis.x * this.globalScaleX;
-        let y = this.axis.y * this.globalScaleY;
-        let axisAngle = Math.atan2(y, x);
-        let axisDist = Math.sqrt(x * x + y * y);
-
-        let cornerX = this.width * (this.align.x - 0.5) * this.globalScaleX;
-        let cornerY = this.height * (this.align.y - 0.5) * this.globalScaleY;
-        let cornerAngle = Math.atan2(cornerY, cornerX);
-        let cornerDist = Math.sqrt(cornerX * cornerX + cornerY * cornerY);
-
-        let px = cx + Math.cos(this.globalRotation * Math.PI / 180 + cornerAngle) * (cornerDist);
-        let py = cy + Math.sin(this.globalRotation * Math.PI / 180 + cornerAngle) * (cornerDist);
-
-        px += Math.cos(this.globalRotation * Math.PI / 180 + axisAngle) * axisDist;
-        py += Math.sin(this.globalRotation * Math.PI / 180 + axisAngle) * axisDist;
-
-
-        let w, h, a, d;
-        if (this.noScale) {
-            w = (this.width - this.width * this.globalScaleX) * (-0.5 + this.align.x);
-            h = (this.height - this.height * this.globalScaleY) * (-0.5 + this.align.y);
-            a = Math.atan2(h, w);
-            d = Math.sqrt(w * w + h * h);
-            //console.log(this.align, w, h, d)
-            px += Math.cos(this.globalRotation * Math.PI / 180 + a) * d;
-            py += Math.sin(this.globalRotation * Math.PI / 180 + a) * d;
-        }
-        */
         let o = this.getGlobalOrigin();
-        //console.log("ori = ", o)
         let w = o.x - this.stage.mouseX;
         let h = o.y - this.stage.mouseY;
         let a = Math.atan2(h, w) + Math.PI;
@@ -196,18 +164,18 @@ export class UIMatrix extends UIElement {
         this.style.width = n + "px";
     }
 
-    public appendChild(element: UIMatrix): UIMatrix {
+    public appendChild(element: DomMatrixElement): DomMatrixElement {
         element.stage = this.stage;
         this.childs.push(element);
-        return super.appendChild(element) as UIMatrix;
+        return super.appendChild(element) as DomMatrixElement;
     }
 
-    public removeChild(element: UIMatrix): UIMatrix {
+    public removeChild(element: DomMatrixElement): DomMatrixElement {
         const id = this.childs.indexOf(element);
         if (id < 0) return null;
         element.stage = null;
         this.childs.splice(id, 1);
-        return super.removeChild(element) as UIMatrix;
+        return super.removeChild(element) as DomMatrixElement;
     }
 
     public update() {
@@ -279,8 +247,8 @@ export class UIMatrix extends UIElement {
     public scale(x: number, y: number): DOMMatrix { return this.matrix.scaleSelf(x, y); }
     public invert(): DOMMatrix { return this.matrix.invertSelf() }
     public rotateFromVector(x: number, y: number): DOMMatrix { return this.matrix.rotateFromVectorSelf(x, y) }
-    public multiply(m: UIMatrix): void { this.matrix.multiplySelf(m.domMatrix); }
-    public preMultiply(m: UIMatrix): void { this.matrix.preMultiplySelf(m.domMatrix); }
+    public multiply(m: DomMatrixElement): void { this.matrix.multiplySelf(m.domMatrix); }
+    public preMultiply(m: DomMatrixElement): void { this.matrix.preMultiplySelf(m.domMatrix); }
     public identity(): void {
         this.matrix.setMatrixValue("matrix(1, 0, 0, 1, 0, 0)");
         this.html.style.transform = "" + this.matrix;
@@ -294,8 +262,8 @@ export class UIMatrix extends UIElement {
     //---------------------------------------------------
 
 
-    public clone(): UIMatrix {
-        var m: UIMatrix = new UIMatrix();
+    public clone(): DomMatrixElement {
+        var m: DomMatrixElement = new DomMatrixElement();
         m.x = this.x;
         m.y = this.y;
         m.rotation = this.rotation;
@@ -318,13 +286,13 @@ export class UIMatrix extends UIElement {
         data += [this.matrix.a, this.matrix.b, this.matrix.c, this.matrix.d, this.matrix.e, this.matrix.f].join(",");
         return data;
     }
-    public static fromDataString(data: string, target: UIMatrix = null): UIMatrix {
+    public static fromDataString(data: string, target: DomMatrixElement = null): DomMatrixElement {
         var t: string[] = data.split("#");
         var p: string[] = t[0].split(",");
         var m: string[] = t[1].split(",");
 
-        var o: UIMatrix;
-        if (!target) o = new UIMatrix();
+        var o: DomMatrixElement;
+        if (!target) o = new DomMatrixElement();
         else o = target;
 
         o.x = Number(p[0]);
@@ -349,7 +317,7 @@ export class UIMatrix extends UIElement {
 }
 
 
-export class UIMatrixStage extends UIMatrix {
+export class DomMatrixElementStage extends DomMatrixElement {
 
     public screenX: number = 0;
     public screenY: number = 0;
