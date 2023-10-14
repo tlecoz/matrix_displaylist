@@ -2,6 +2,7 @@ import { UIElement } from "../UIElement";
 
 
 export class Axis {
+    public static TOP: DOMPoint = new DOMPoint(0.5, 0);
     public static TOP_LEFT: DOMPoint = new DOMPoint(0, 0);
     public static LEFT: DOMPoint = new DOMPoint(0, 0.5);
     public static BOTTOM_LEFT: DOMPoint = new DOMPoint(0, 1);
@@ -9,8 +10,21 @@ export class Axis {
     public static TOP_RIGHT: DOMPoint = new DOMPoint(1, 0);
     public static RIGHT: DOMPoint = new DOMPoint(1, 0.5);
     public static BOTTOM_RIGHT: DOMPoint = new DOMPoint(1, 1);
+    public static BOTTOM: DOMPoint = new DOMPoint(0.5, 1);
 }
 
+export type MatrixInfos = {
+    x: number,
+    y: number,
+    rotation: number,
+    scaleX: number,
+    scaleY: number,
+    width: number,
+    height: number
+    axis?: DOMPoint,
+    align?: DOMPoint,
+    alignFromContainer?: DOMPoint,
+}
 
 
 export class DomMatrixElement extends UIElement {
@@ -31,7 +45,7 @@ export class DomMatrixElement extends UIElement {
     public onUpdate: () => void;
 
     private boundingBox: DOMRect = new DOMRect();
-
+    public data: any = {};//empty object that can be used to store data
     public noScale: boolean = false;
 
     constructor(tag: string = "div", style?: any) {
@@ -41,8 +55,8 @@ export class DomMatrixElement extends UIElement {
             height: "1px",
             ...style
         })
-        this.align = new DOMPoint();
-        this.alignFromContainer = new DOMPoint();
+        this.align = Axis.CENTER;
+        this.alignFromContainer = Axis.CENTER;
         this.axis = new DOMPoint();
         this.matrix = new DOMMatrix()
 
@@ -256,12 +270,34 @@ export class DomMatrixElement extends UIElement {
     public setMatrixValue(s: string = "matrix(1, 0, 0, 1, 0, 0)"): DOMMatrix { return this.matrix.setMatrixValue(s); }
 
 
+    public get domMatrix(): DOMMatrix { return this.matrix; }
 
+
+
+    public getMatrixInfos(): MatrixInfos {
+        var m: any = {};
+        m.x = this.x;
+        m.y = this.y;
+        m.rotation = this.rotation;
+        m.scaleX = this.scaleX;
+        m.scaleY = this.scaleY;
+        m.axis = new DOMPoint(this.axis.x, this.axis.y)
+        m.align = new DOMPoint(this.align.x, this.align.y);
+        m.alignFromContainer = new DOMPoint(this.alignFromContainer.x, this.alignFromContainer.y);
+        m.width = this.width;
+        m.height = this.height;
+        return m;
+    }
 
 
     //---------------------------------------------------
 
 
+
+
+
+
+    /*
     public clone(): DomMatrixElement {
         var m: DomMatrixElement = new DomMatrixElement();
         m.x = this.x;
@@ -270,16 +306,13 @@ export class DomMatrixElement extends UIElement {
         m.scaleX = this.scaleX;
         m.scaleY = this.scaleY;
         m.axis = new DOMPoint(this.axis.x, this.axis.y)
-        m.align = this.align;
+        m.align = new DOMPoint(this.align.x, this.align.y);
+        m.alignFromContainer = new DOMPoint(this.alignFromContainer.x, this.alignFromContainer.y);
         m.width = this.width;
         m.height = this.height;
         m.setMatrixValue(this.matrix.toString());
         return m;
     }
-
-
-    public get domMatrix(): DOMMatrix { return this.matrix; }
-
     public get dataString(): string {
         var data: string = [this.x, this.y, this.axis.x, this.axis.y, this.rotation, this.scaleX, this.scaleY, this.width, this.height].join(",");
         data += "#";
@@ -313,7 +346,7 @@ export class DomMatrixElement extends UIElement {
         o.domMatrix.f = Number(m[5]);
 
         return o;
-    }
+    }*/
 }
 
 
@@ -324,8 +357,8 @@ export class DomMatrixElementStage extends DomMatrixElement {
     private _mouseX: number = 0;
     private _mouseY: number = 0;
 
-    constructor() {
-        super();
+    constructor(tag: string = "div", style?: any) {
+        super(tag, style);
         this.stage = this;
         this.getScreenPosition();
         document.body.addEventListener("mousemove", (e) => {

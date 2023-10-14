@@ -108,15 +108,15 @@ export class TestApp extends DomMatrixElementStage {
             addObj(oo, oo.mouseX, oo.mouseY)
         })
 
-
         let bool = false;
+        /*
         this.greenSquare.addEventListener("click", (e) => {
             bool = true;
             this.greenSquare.moveRotationAxis(this.greenSquare.mouseX, this.greenSquare.mouseY);
             addObj(this.greenSquare, this.greenSquare.mouseX, this.greenSquare.mouseY);
 
             //this.greenSquare.rotation += 10;
-        })
+        })*/
 
         let item = document.createElement("div");
         item.style.position = "absolute";

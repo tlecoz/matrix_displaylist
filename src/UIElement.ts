@@ -114,4 +114,7 @@ export class UIElement {
     public removeEventListener(eventName: string, func: () => void) {
         this.html.removeEventListener(eventName, func);
     }
+    public dispatchEvent(name: string) {
+        this.html.dispatchEvent(new Event(name))
+    }
 }   
