@@ -194,14 +194,14 @@ export class DomMatrixElement extends UIElement {
         return super.removeChild(element) as DomMatrixElement;
     }
 
-    public update() {
+    public update(computeOnly: boolean = false) {
         if (this.onUpdate) this.onUpdate();
         this.identity();
-        this.applyTransform();
-        for (let i = 0; i < this.childs.length; i++) this.childs[i].update();
+        this.applyTransform(computeOnly);
+        for (let i = 0; i < this.childs.length; i++) this.childs[i].update(computeOnly);
     }
 
-    public applyTransform(): DOMMatrix {
+    public applyTransform(computeOnly: boolean = false): DOMMatrix {
         const m: DOMMatrix = this.matrix;
 
         let alignX = 0, alignY = 0;
@@ -235,7 +235,7 @@ export class DomMatrixElement extends UIElement {
 
 
 
-        this.style.transform = "" + m;
+        if (!computeOnly) this.style.transform = "" + m;
         this.boundingBox = this.getBoundingRect();
         return m;
     }
@@ -391,11 +391,11 @@ export class DomMatrixElementStage extends DomMatrixElement {
     public get globalScaleY(): number { return 1 };
     public get globalRotation(): number { return 0 };
 
-    public update() {
+    public update(computeOnly: boolean = false) {
         this.getScreenPosition();
         if (this.onUpdate) this.onUpdate();
         this.identity();
-        this.applyTransform();
-        for (let i = 0; i < this.childs.length; i++) this.childs[i].update();
+        this.applyTransform(computeOnly);
+        for (let i = 0; i < this.childs.length; i++) this.childs[i].update(computeOnly);
     }
 }

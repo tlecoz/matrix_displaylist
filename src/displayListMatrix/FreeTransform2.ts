@@ -31,6 +31,7 @@ export class FreeTransform2 extends DomMatrixElement {
     protected resizingY: boolean = false;
     protected movingAxis: boolean = false;
     protected rotating: boolean = false;
+    protected moving: boolean = false;
     protected currentBtn: DomMatrixElement;
     //---------
     public resizeFromCenter: boolean = false;
@@ -48,12 +49,13 @@ export class FreeTransform2 extends DomMatrixElement {
                 this.rotationAxis.x = this.rotationAxisDisplay.x;
                 this.rotationAxis.y = this.rotationAxisDisplay.y;
             }
-            this.resizing = this.resizingX = this.resizingY = this.movingAxis = this.rotating = false;
+            this.resizing = this.resizingX = this.resizingY = this.movingAxis = this.rotating = this.moving = false;
         })
         document.body.addEventListener("mousemove", () => {
             if (this.resizing) this.applyResizing();
             else if (this.movingAxis) this.applyMoveRotationAxis();
             else if (this.rotating) this.applyRotation();
+            else if (this.moving) this.applyMoving();
         })
     }
 
@@ -188,8 +190,11 @@ export class FreeTransform2 extends DomMatrixElement {
         }
 
         if (this.resizeFromCenter == false) {
-            this.x = opposite.x + Math.cos(offsetAngle + data.angle) * (dist * 0.5);
-            this.y = opposite.y + Math.sin(offsetAngle + data.angle) * (dist * 0.5);
+            let r = this.rotation * Math.PI / 180;
+            let a = Math.atan2(this.axis.y, this.axis.x);
+            let d = Math.sqrt(this.axis.x * this.axis.x + this.axis.y * this.axis.y);
+            this.x = Math.cos(r + a) * d + opposite.x + Math.cos(offsetAngle + data.angle) * (dist * 0.5);
+            this.y = Math.sin(r + a) * d + opposite.y + Math.sin(offsetAngle + data.angle) * (dist * 0.5);
         }
 
         this.inverseBorderAndButtonsScaleDimension();
@@ -200,22 +205,45 @@ export class FreeTransform2 extends DomMatrixElement {
 
 
     protected startMoveRotationAxis() {
+        const data = this.currentBtn.data;
+        data.mx = this.stage.mouseX;
+        data.my = this.stage.mouseY;
 
     }
     protected applyMoveRotationAxis() {
 
+        this.moveRotationAxis(this.mouseX, this.mouseY);
+        this.rotationAxisDisplay.x = this.rotationAxis.x = this.axis.x / this.scaleX;
+        this.rotationAxisDisplay.y = this.rotationAxis.y = this.axis.y / this.scaleY;
+
+        console.log(this.mouseX, this.rotationAxisDisplay.x)
+        this.stage.update();
     }
+
+
+    protected startMoving() {
+        const data = this.currentBtn.data;
+        data.mx = this.stage.mouseX - this.x;
+        data.my = this.stage.mouseY - this.y;
+    }
+    protected applyMoving() {
+        const data = this.currentBtn.data;
+        this.x = this.stage.mouseX - data.mx;
+        this.y = this.stage.mouseY - data.my;
+    }
+
+
+
 
     protected startRotation() {
         const data = this.currentBtn.data;
-        data.axis = this.rotationAxis.getGlobalOrigin();
+        data.axis = this.rotationAxisDisplay.getGlobalOrigin();
         data.offsetRotation = this.rotation;
         data.offsetAngle = this.getAngle({
             x: this.stage.mouseX,
             y: this.stage.mouseY
         }, data.axis)
 
-        console.log(data)
     }
     protected applyRotation() {
         const data = this.currentBtn.data;
@@ -277,6 +305,7 @@ export class FreeTransform2 extends DomMatrixElement {
             backgroundColor: "#0000ff",
             padding: "15px",
             zIndex: "0",
+            userSelect: "none",
         })
         label.width = obj.width;
         label.height = obj.height;
@@ -369,8 +398,18 @@ export class FreeTransform2 extends DomMatrixElement {
 
         this.border = this.appendChild(new DomMatrixElement("div", {
             outline: "solid 1px #ffffff",
-
+            backgroundColor: "transparent",
+            cursor: "pointer",
+            zIndex: "" + 999,
         }))
+
+        this.border.addEventListener("mousedown", () => {
+            this.currentBtn = this.border;
+            if (!this.border.data) this.border.data = {};
+            this.moving = true;
+            this.startMoving();
+        })
+
         //this.border.noScale = true;
 
         const anchorSize = 10;
