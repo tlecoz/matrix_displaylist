@@ -55,6 +55,7 @@ export class FreeTransform2 extends DomMatrixElement {
             if (this.resizing) {
                 this.rotationAxis.x = this.rotationAxisDisplay.x;
                 this.rotationAxis.y = this.rotationAxisDisplay.y;
+
             }
             this.resizing = this.resizingX = this.resizingY = this.movingAxis = this.rotating = this.moving = false;
         })
@@ -421,11 +422,12 @@ export class FreeTransform2 extends DomMatrixElement {
 
 
     private inverseBorderAndButtonsScaleDimension() {
+
         this.border.width = Math.abs(this.width * this.scaleX);
         this.border.height = Math.abs(this.height * this.scaleY);
         this.border.scaleX = 1 / this.scaleX;
         this.border.scaleY = 1 / this.scaleY;
-
+        return
         for (let i = 0; i < this.buttons.length; i++) {
             this.buttons[i].scaleX = 1 / this.scaleX;
             this.buttons[i].scaleY = 1 / this.scaleY;
@@ -448,7 +450,7 @@ export class FreeTransform2 extends DomMatrixElement {
                 ...style
             })
             if (axis) btn.data.position = { x: axis.x - 0.5, y: axis.y - 0.5 };
-            //btn.noScale = true;
+            btn.noScale = true;
             btn.width = btn.height = size;
             btn.align = Axis.CENTER;
             btn.alignFromContainer = Axis.CENTER;

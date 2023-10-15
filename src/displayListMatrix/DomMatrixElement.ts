@@ -194,15 +194,49 @@ export class DomMatrixElement extends UIElement {
         return super.removeChild(element) as DomMatrixElement;
     }
 
-    public update(computeOnly: boolean = false) {
+    public update() {
         if (this.onUpdate) this.onUpdate();
         this.identity();
-        this.applyTransform(computeOnly);
-        for (let i = 0; i < this.childs.length; i++) this.childs[i].update(computeOnly);
+        this.applyTransform();
+        for (let i = 0; i < this.childs.length; i++) this.childs[i].update();
     }
 
-    public applyTransform(computeOnly: boolean = false): DOMMatrix {
+    public applyTransform(usedInCanvas: boolean = false): DOMMatrix {
         const m: DOMMatrix = this.matrix;
+
+
+        //-------------------- DOM --------------------------------
+
+        if (!usedInCanvas) {
+
+            let alignX = 0, alignY = 0;
+            if (this.parent) {
+                alignX = this.alignFromContainer.x * this.parent.width;
+                alignY = this.alignFromContainer.y * this.parent.height;
+                m.multiplySelf(this.parent);
+            }
+
+
+            if (!this.noScale) {
+                m.translateSelf(this.x - this.align.x * this.width + alignX, this.y - this.align.y * this.height + alignY);
+                m.rotateSelf(this.rotation);
+                m.translateSelf(-this.axis.x, -this.axis.y)
+                m.scaleSelf(this.scaleX, this.scaleY);
+            } else {
+
+                m.translateSelf(this.x - this.align.x * this.width + alignX, this.y - this.align.y * this.height + alignY);
+                m.rotateSelf(this.rotation);
+                m.translateSelf(-this.axis.x, -this.axis.y)
+                m.scaleSelf(1 / this.globalScaleX, 1 / this.globalScaleY);
+            }
+
+            this.style.transform = "" + m;
+            this.boundingBox = this.getBoundingRect();
+
+            return m;
+        }
+
+        //---------------- CANVAS -----------------------------
 
         let alignX = 0, alignY = 0;
         if (this.parent) {
@@ -212,48 +246,30 @@ export class DomMatrixElement extends UIElement {
         }
 
 
-        if (!this.noScale) {
-            m.translateSelf(this.x - this.align.x * this.width + alignX, this.y - this.align.y * this.height + alignY);
-            m.rotateSelf(this.rotation);
-            m.translateSelf(-this.axis.x, -this.axis.y)
-            m.scaleSelf(this.scaleX, this.scaleY);
-        } else {
 
-            const ratioX = 1 / this.globalScaleX;
-            const ratioY = 1 / this.globalScaleY;
+        let ax = -this.axis.x + alignX - this.align.x * this.width * this.scaleX;
+        let ay = -this.axis.y + alignY - this.align.y * this.height * this.scaleY;
+        let r = this.rotation * Math.PI / 180;
+        let a = Math.atan2(ay, ax);
+        let da = Math.sqrt(ax * ax + ay * ay) //+ Math.PI;  
 
-            const n = (this.width * 0.5 * this.globalScaleX - this.width * 0.5) * 0.5
 
-            m.translateSelf(this.x - this.align.x * this.width * ratioX - n + alignX, this.y - this.align.y * this.height * ratioY + alignY);
-            m.rotateSelf(this.rotation);
-            m.translateSelf(-this.axis.x, -this.axis.y)
-            //m.translateSelf((this.width * this.globalScaleX - this.width * (this.align.x)), (this.height * 0.5 * this.globalScaleY - this.height * (this.align.y + 0.5)))
-            m.scaleSelf(1 / this.globalScaleX, 1 / this.globalScaleY);
-        }
+        m.translateSelf(this.x, this.y);
+        m.rotateSelf(this.rotation);
+        m.translateSelf(Math.cos(a) * da, Math.sin(a) * da)
+        m.scaleSelf(this.scaleX, this.scaleY);
+
+
+        console.log("aaa ", alignX)
 
 
 
 
 
-        if (!computeOnly) this.style.transform = "" + m;
-        this.boundingBox = this.getBoundingRect();
         return m;
     }
 
-    public get globalX(): number {
-        let x = this.x * this.parent.scaleX - this.parent.width * this.alignFromContainer.x;
-        let y = this.y * this.parent.scaleY - this.parent.height * this.alignFromContainer.y;;
-        let a = Math.atan2(y, x);
-        let d = Math.sqrt(x * x + y * y);
-        return this.parent.globalX + Math.cos(a) * d;
-    };
-    public get globalY(): number {
-        let x = this.x * this.parent.scaleX;
-        let y = this.y * this.parent.scaleY;
-        let a = Math.atan2(y, x);
-        let d = Math.sqrt(x * x + y * y);
-        return this.parent.globalX + Math.cos(a) * d;
-    };
+
     public get globalScaleX(): number { return this.parent.globalScaleX * this.scaleX };
     public get globalScaleY(): number { return this.parent.globalScaleY * this.scaleY };
     public get globalRotation(): number { return this.parent.globalRotation + this.rotation };
@@ -274,10 +290,22 @@ export class DomMatrixElement extends UIElement {
 
     public get domMatrix(): DOMMatrix { return this.matrix; }
 
+    private static canvasMatrixElement: DomMatrixElement;
+    public get canvasMatrix(): DOMMatrix {
+        if (!DomMatrixElement.canvasMatrixElement) DomMatrixElement.canvasMatrixElement = new DomMatrixElement();
+        const m: DomMatrixElement = this.getMatrixInfos(DomMatrixElement.canvasMatrixElement) as DomMatrixElement;
+        m.identity();
+        m.applyTransform(true)
 
 
-    public getMatrixInfos(): MatrixInfos {
-        var m: any = {};
+        return m.matrix;
+    }
+
+
+
+
+    public getMatrixInfos(input?: DomMatrixElement): MatrixInfos {
+        var m: any = input ? input : {};
         m.x = this.x;
         m.y = this.y;
         m.rotation = this.rotation;
@@ -288,9 +316,15 @@ export class DomMatrixElement extends UIElement {
         m.alignFromContainer = new DOMPoint(this.alignFromContainer.x, this.alignFromContainer.y);
         m.width = this.width;
         m.height = this.height;
+        m.parent = this.parent;
+        m.stage = this.stage;
         return m;
     }
 
+    public clone(): DomMatrixElement {
+
+        return this.getMatrixInfos(new DomMatrixElement()) as DomMatrixElement;
+    }
 
     //---------------------------------------------------
 
@@ -391,11 +425,11 @@ export class DomMatrixElementStage extends DomMatrixElement {
     public get globalScaleY(): number { return 1 };
     public get globalRotation(): number { return 0 };
 
-    public update(computeOnly: boolean = false) {
+    public update() {
         this.getScreenPosition();
         if (this.onUpdate) this.onUpdate();
         this.identity();
-        this.applyTransform(computeOnly);
-        for (let i = 0; i < this.childs.length; i++) this.childs[i].update(computeOnly);
+        this.applyTransform();
+        for (let i = 0; i < this.childs.length; i++) this.childs[i].update();
     }
 }

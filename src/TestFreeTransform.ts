@@ -42,12 +42,13 @@ export class TestFreeTransform extends DomMatrixElementStage {
         this.html.appendChild(stage.canvas)
 
         let bmp = document.createElement("canvas");
-        bmp.width = bmp.height = 150;
+        bmp.width = obj.width
+        bmp.height = obj.height;
         bmp.getContext("2d").fillStyle = "#0000ff";
-        bmp.getContext("2d").fillRect(0, 0, 150, 150);
+        bmp.getContext("2d").fillRect(0, 0, bmp.width, bmp.height);
         bmp.getContext("2d").fillStyle = "#ff0000";
         bmp.getContext("2d").font = "20px Arial"
-        bmp.getContext("2d").fillText("AAAAAAAA", 0, 20, 150)
+        bmp.getContext("2d").fillText("AAAAAAAA", 0, 20, bmp.width)
 
 
         const item = new DisplayElement(obj.width, obj.height);
@@ -68,14 +69,40 @@ export class TestFreeTransform extends DomMatrixElementStage {
         }
 
         stage.appendChild(item);
-        stage.drawElements()
+        //stage.drawElements()
 
+
+        const renderOnCanvas = () => {
+            let ctx = stage.context;
+            ctx.canvas.width = ctx.canvas.width;
+            item.identity();
+            ctx.save();
+            const m = transform.canvasMatrix;
+
+            /*
+            const m = new DOMMatrix();
+            const dw = transform.width * transform.scaleX - transform.width
+            const dx = transform.x - obj.x;
+            const dh = transform.height * transform.scaleY - transform.height
+            const dy = transform.y - obj.y;
+            */
+
+            //m.translateSelf(-dx * 2 - dw * 0.5, -dy);
+
+
+
+            ctx.transform(m.a, m.b, m.c, m.d, m.e, m.f);
+            //ctx.scale(1 / bmp.width, 1 / bmp.height)
+            ctx.drawImage(bmp, 0, 0);
+            ctx.restore()
+        }
+        setTimeout(() => {
+            renderOnCanvas()
+        }, (1));
 
 
         transform.addEventListener(FreeTransform2.CHANGED, () => {
-            item.init(transform.getMatrixInfos());
-            stage.drawElements()
-            //item.renderTransform(stage.context, transform.domMatrix);
+            renderOnCanvas()
         })
 
 
