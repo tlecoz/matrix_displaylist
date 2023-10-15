@@ -46,7 +46,19 @@ export class DomMatrixElement extends UIElement {
 
     private boundingBox: DOMRect = new DOMRect();
     public data: any = {};//empty object that can be used to store data
+
+    /*
+    if noScale = true, the position of the points will be affected by the parent's transformation but not the scaleX/scaleY
+    so the size of the childs become independant of the parent
+    */
     public noScale: boolean = false;
+
+    /*
+    if noScale = true and noScaleAlign = true, the position of the points will be affected by the parent's transformation but not the scaleX/scaleY AND the origin
+    So if you move the origin of the object, you can have a static well defined offset that won't be affected by the parent 
+    */
+    public noScaleAlign: boolean = false; //if noScale is set to 
+
 
     constructor(tag: string = "div", style?: any) {
         super(tag, {
@@ -201,6 +213,9 @@ export class DomMatrixElement extends UIElement {
         for (let i = 0; i < this.childs.length; i++) this.childs[i].update();
     }
 
+
+
+
     public applyTransform(usedInCanvas: boolean = false): DOMMatrix {
         const m: DOMMatrix = this.matrix;
 
@@ -217,7 +232,7 @@ export class DomMatrixElement extends UIElement {
             }
 
 
-            if (!this.noScale) {
+            if (this.noScale == false) {
                 m.translateSelf(this.x - this.align.x * this.width + alignX, this.y - this.align.y * this.height + alignY);
                 m.rotateSelf(this.rotation);
                 m.translateSelf(-this.axis.x, -this.axis.y)
@@ -228,6 +243,13 @@ export class DomMatrixElement extends UIElement {
                 m.rotateSelf(this.rotation);
                 m.translateSelf(-this.axis.x, -this.axis.y)
                 m.scaleSelf(1 / this.globalScaleX, 1 / this.globalScaleY);
+
+                if (this.noScaleAlign) {
+                    const signY = this.globalScaleY > 0 ? 1 : -1;
+                    const signX = this.globalScaleX > 0 ? 1 : -1;
+
+                    m.translateSelf(-this.axis.x * signX + this.axis.x * this.globalScaleX, -this.axis.y * signY + this.axis.y * this.globalScaleY)
+                }
             }
 
             this.style.transform = "" + m;
@@ -260,10 +282,6 @@ export class DomMatrixElement extends UIElement {
         m.scaleSelf(this.scaleX, this.scaleY);
 
 
-        console.log("aaa ", alignX)
-
-
-
 
 
         return m;
@@ -283,7 +301,7 @@ export class DomMatrixElement extends UIElement {
     public preMultiply(m: DomMatrixElement): void { this.matrix.preMultiplySelf(m.domMatrix); }
     public identity(): void {
         this.matrix.setMatrixValue("matrix(1, 0, 0, 1, 0, 0)");
-        this.html.style.transform = "" + this.matrix;
+        //this.html.style.transform = "" + this.matrix;
     }
     public setMatrixValue(s: string = "matrix(1, 0, 0, 1, 0, 0)"): DOMMatrix { return this.matrix.setMatrixValue(s); }
 
@@ -398,9 +416,10 @@ export class DomMatrixElementStage extends DomMatrixElement {
         this.stage = this;
         this.getScreenPosition();
         document.body.addEventListener("mousemove", (e) => {
+            e.preventDefault();
 
-            this._mouseX = e.pageX;
-            this._mouseY = e.pageY;
+            this._mouseX = e.clientX - this.screenX;
+            this._mouseY = e.clientY - this.screenY;
         })
 
     }

@@ -2,13 +2,13 @@ import { UIElement } from "./UIElement";
 import { DivElement } from "./display/DivElement";
 import { DivGroup } from "./display/DivGroup";
 import { StageDiv } from "./display/StageDiv";
-import { FreeTransform } from "./freeTransform/FreeTransform";
+import { FreeTransformOld } from "./freeTransform/FreeTransformOld";
 
 export class App {
 
 
     private stage: StageDiv;
-    private freeTransform: FreeTransform;
+    private freeTransform: FreeTransformOld;
     private debugPt: UIElement;
 
 
@@ -25,7 +25,7 @@ export class App {
         this.debugPt.style.width = this.debugPt.style.height = 8 + "px";
 
 
-        this.freeTransform = new FreeTransform();
+        this.freeTransform = new FreeTransformOld();
 
 
 

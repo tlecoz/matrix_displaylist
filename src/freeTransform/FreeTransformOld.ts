@@ -3,7 +3,7 @@ import { DivElement } from "../display/DivElement";
 import { DivGroup } from "../display/DivGroup";
 import { Pt2D } from "../geom/Pt2D";
 
-export class FreeTransform extends DivGroup {
+export class FreeTransformOld extends DivGroup {
 
     public buttons: DivGroup;
     public left: DivElement;
