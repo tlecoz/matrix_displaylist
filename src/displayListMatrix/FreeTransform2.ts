@@ -41,7 +41,7 @@ export class FreeTransform2 extends DomMatrixElement {
     protected moving: boolean = false;
     protected currentBtn: DomMatrixElement;
     //---------
-    public resizeFromCenter: boolean = true;
+    public resizeFromCenter: boolean = false;
 
     constructor() {
         super("div", {
@@ -160,8 +160,13 @@ export class FreeTransform2 extends DomMatrixElement {
         const data = this.currentBtn.data;
         const axis = this.rotationAxis.getGlobalOrigin();
 
-        data.sens = this.getSens({ x: this.stage.mouseX, y: this.stage.mouseY }, sideA, sideB)
-        data.dist = this.getDistance({ x: this.stage.mouseX, y: this.stage.mouseY }, axis);
+        const mx = this.stage.mouseX - this.currentBtn.mouseX;
+        const my = this.stage.mouseY - this.currentBtn.mouseY;
+
+
+
+        data.sens = this.getSens({ x: mx, y: my }, sideA, sideB)
+        data.dist = this.getDistance({ x: mx, y: my }, axis);
         data.axisOrigin = axis;
         data.offsetScaleX = this.scaleX;
         data.offsetScaleY = this.scaleY;
@@ -177,25 +182,34 @@ export class FreeTransform2 extends DomMatrixElement {
         //so even if if the scaleX/scaleY change its sign, it won't affect these values 
         data.sideAOrigin = sideA;
         data.sideBOrigin = sideB;
+
+        data.mx = this.currentBtn.mouseX;
+        data.my = this.currentBtn.mouseY;
     }
 
 
     protected applyResizing() {
 
         const data = this.currentBtn.data;
+
+
+        const mx = this.stage.mouseX - data.mx;
+        const my = this.stage.mouseY - data.my;
+
+
         let btn = data.btnOrigin;//this.currentBtn.getGlobalOrigin();
         let opposite = data.oppositeOrigin;//data.opposite.getGlobalOrigin();
         const origin = data.axisOrigin;
         const sideA = data.sideAOrigin;
         const sideB = data.sideBOrigin;
-        const pt = this.getClosestPointOnLine(this.stage.mouseX, this.stage.mouseY, btn, opposite);
+        const pt = this.getClosestPointOnLine(mx, my, btn, opposite);
 
         let dist = this.getDistance(pt, origin);
         let resizingScale = dist / data.dist;
         if (Math.abs(resizingScale) === 0) return;
 
 
-        const sens = this.getSens({ x: this.stage.mouseX, y: this.stage.mouseY }, sideA, sideB)
+        const sens = this.getSens({ x: pt.x, y: pt.y }, sideA, sideB)
         let offsetAngle = Math.PI;
 
         if (sens != data.sens) {
@@ -481,7 +495,7 @@ export class FreeTransform2 extends DomMatrixElement {
 
         //this.border.noScale = true;
 
-        const anchorSize = 10;
+        const anchorSize = 30;
         const buttons = this.buttons = []
         let nb = 0;
 
