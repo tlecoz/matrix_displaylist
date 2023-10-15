@@ -398,8 +398,9 @@ export class DomMatrixElementStage extends DomMatrixElement {
         this.stage = this;
         this.getScreenPosition();
         document.body.addEventListener("mousemove", (e) => {
-            this._mouseX = e.clientX;
-            this._mouseY = e.clientY;
+
+            this._mouseX = e.pageX;
+            this._mouseY = e.pageY;
         })
 
     }
