@@ -495,7 +495,7 @@ export class FreeTransform2 extends DomMatrixElement {
 
         //this.border.noScale = true;
 
-        const anchorSize = 30;
+        const anchorSize = 10;
         const buttons = this.buttons = []
         let nb = 0;
 
